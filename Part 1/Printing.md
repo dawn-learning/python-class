@@ -1,0 +1,5 @@
+# Printing
+
+```python
+print("hi")
+```
