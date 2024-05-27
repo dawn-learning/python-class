@@ -1,45 +1,5 @@
 Test Example
 
-We want to show text to the user. We could create our own popup window but, in order to run the code we need something called the command line, so we will just use that.
-
-```python
-
-print(print)
-
-print("hi")
-
-```
-
-Command(what we want the command to work with)
-
-So lets add the text to interview a suspect.
-
-```python
-
-print("Sir Regenald")
-
-print(" Hello my good man.")
-
-print("Ask a question:")
-
-print(' "Are you the theif?"')
-
-print(' "Did you witness anything?"')
-
-```
-
-Now we need to figure out which of the options the user want to select.
-
-```Python
-
-print(' 1 - "Are you the theif?"')
-
-print(' 2 - "Did you witness anything?"')
-
-print(input("Select: "))
-
-```
-
 TANGENT
 
 Set equivalence vs check equivalence

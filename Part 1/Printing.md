@@ -1,5 +1,0 @@
-# Printing
-
-```python
-print("hi")
-```
