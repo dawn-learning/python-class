@@ -1,5 +1,4 @@
 import os
-dialogue = "Hello my good man."
 
 def print_text(name, dialogue, questions):
     print(name)
@@ -9,10 +8,14 @@ def print_text(name, dialogue, questions):
         print(' ' + str(i + 1) + ' - "' + questions[i] + '"')
     print(" e - Exit")
 
+name = "Sir Regenald"
+dialogue = "Hello my good man."
+questions = ["Are you the theif?", "Did you witness anything?", "Who do you think did it?"]
+
 while(True):
     os.system('cls||clear')
 
-    print_text("Sir Regenald", dialogue, ["Are you the theif?", "Did you witness anything?", "Who do you think did it?"])
+    print_text(name, dialogue, questions)
 
     users_input = input("Select an option: ")
 
