@@ -1,16 +1,26 @@
-# print(print)
-the_input = "2"
+import os
 
-a : int = 1
-a : float = 2.0
-a : str = ""
-test_set : set = set(("stuff", "and", "Things"))
+def print_text(name, dialogue, questions):
+    print(name)
+    print(" " + dialogue + "\n")
+    print("Ask a question:")
+    for i in range(len(questions)):
+        print(' ' + str(i + 1) + ' - "' + questions[i] + '"')
+    print(" e - Exit")
 
-class a_class():
-    def __init__(self):
-        print("initalized")
-    
-    def second(self):
-        print("second")
+name = "Sir Regenald"
+dialogue = "Hello my good man."
+questions = ["Are you the theif?", "Did you witness anything?", "Who do you think did it?"]
 
-a_class().second()
+while(True):
+    os.system('cls||clear')
+
+    print_text(name, dialogue, questions)
+
+    users_input = input("Select an option: ")
+
+    if (users_input == "e"):
+        break
+    else:
+        answers = ["No. Absolutely not!" + "\n How DARE you accuse me of that!", "Well, I did see someone running across the rooftop last night at midnight.", "I have no idea, unfortunately."]
+        dialogue = answers[int(users_input)-1]

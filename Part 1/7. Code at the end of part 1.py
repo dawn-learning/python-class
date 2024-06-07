@@ -1,26 +1,17 @@
-import os
+questions = ['1 - "Are you the theif?"', '2 - "Did you witness anything?"', '3 - "Did you witness anything?"']
+answers = ["No. Absolutely not!\nHow DARE you accuse me of that!", "Select a valid command to ask a question.", "Select a valid command to ask a question."]
 
-def print_text(name, dialogue, questions):
-    print(name)
-    print(" " + dialogue + "\n")
+while (True):
+    print("Sir Regenald")
+    print(" Hello my good man.")
+    print("-----")
     print("Ask a question:")
-    for i in range(len(questions)):
-        print(' ' + str(i + 1) + ' - "' + questions[i] + '"')
-    print(" e - Exit")
+    for a in questions:
+        print(a)
+    print(" e - exit")
 
-name = "Sir Regenald"
-dialogue = "Hello my good man."
-questions = ["Are you the theif?", "Did you witness anything?", "Who do you think did it?"]
 
-while(True):
-    os.system('cls||clear')
-
-    print_text(name, dialogue, questions)
-
-    users_input = input("Select an option: ")
-
-    if (users_input == "e"):
+    the_input = input("Select: ")
+    if (the_input == "e"):
         break
-    else:
-        answers = ["No. Absolutely not!" + "\n How DARE you accuse me of that!", "Well, I did see someone running across the rooftop last night at midnight.", "I have no idea, unfortunately."]
-        dialogue = answers[int(users_input)-1]
+    print(answers[int(the_input)-1])
