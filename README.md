@@ -1,4 +1,19 @@
-# Setup steps
+# Python Programming Parts 1-8 at the Athens Library
+This GitHub repository contains thorough notes, code snippets to copy and paste, and the completed project as a preview.
+
+## The class
+Learn the basics of Python through Game Design! Over the course of the three classes, you will be given the tools needed to build a simple visual novel detective game and the fundamentals needed to make more complex games.
+
+### Part 1:
+We plan to cover variables, Boolean Logic, if else, and loops.
+
+### Part 2:
+We plan to cover importing, classes, functions, and OOP.
+
+### Part 3:
+We plan to cover how to add visuals using Tkinter.
+
+## Setup steps for the class
 How to setup for the Python programming class on a computer that has never run Python before.
 
 1. Download and install Visual Studio Code from https://code.visualstudio.com/Download.
