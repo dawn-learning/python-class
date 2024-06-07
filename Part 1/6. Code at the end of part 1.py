@@ -1,4 +1,4 @@
-questions = ['1 - "Are you the theif?"', '2 - "Did you witness anything?"', '3 - "Did you witness anything?"']
+questions = ['1 - "Are you the thief?"', '2 - "Did you witness anything?"', '3 - "Did you witness anything?"']
 answers = ["No. Absolutely not!\nHow DARE you accuse me of that!", "Select a valid command to ask a question.", "Select a valid command to ask a question."]
 
 while (True):
@@ -6,6 +6,7 @@ while (True):
     print(" Hello my good man.")
     print("-----")
     print("Ask a question:")
+
     for a in questions:
         print(a)
     print(" e - exit")
