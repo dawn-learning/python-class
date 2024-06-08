@@ -1,4 +1,4 @@
-# Python Programming Parts 1-8 at the Athens Library
+# Python Programming Parts 1-3 at the Athens Library
 This GitHub repository contains thorough notes, code snippets to copy and paste, and the completed project as a preview.
 
 ## The class
