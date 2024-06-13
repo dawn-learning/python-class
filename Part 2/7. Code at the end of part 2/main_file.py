@@ -9,29 +9,36 @@ characters = [
     Villian(name="Suspect_2", starter_dialogue="a", location=(1, 1)),
 ]
 
-while True:
+def clear():
     os.system('cls||clear')
+
+def character_dialogue(name, dialogue):
+        print(name)
+        print(" " + dialogue)
+        print("-" * 50)
+
+def exit_text():
+    print(" e - Exit")
+
+while True:
+    clear()
     print("Select a suspect")
     for i in range(len(characters)):
         print(" " + str(i+1) + " - " + characters[i].name)
-    print(" e - Exit")
+    exit_text()
     selection = input()
     if (selection == "e"):
         break
-    selected_character_id = int(selection) - 1
-    selected_character = characters[selected_character_id]
+    selected_character = characters[selected_character_id := int(selection) - 1]
     dialogue = selected_character.starter_dialogue
     while True:
-        os.system('cls||clear')
-        print(selected_character.name)
-        print(" " + dialogue)
-        print("-" * 50)
+        clear()
+        character_dialogue(selected_character.name, dialogue)
         for i in range(len(selected_character.questionsAndAnswers)):
             print(' ' + str(i + 1) + ' - "' + selected_character.questionsAndAnswers[i][0] + '"')
-        print(" e - Exit")
+        exit_text()
         selection = input()
         if (selection == "e"):
             break
-        else:
-            dialogue = selected_character.questionsAndAnswers[int(selection)-1][1]
-os.system('cls||clear')
+        dialogue = selected_character.questionsAndAnswers[int(selection)-1][1]
+clear()
