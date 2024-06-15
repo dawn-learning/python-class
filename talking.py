@@ -1,22 +1,48 @@
-# from classes_file import *
-# import os
+import os
+game_not_over = True
 
-# questions = ['1 - "Are you the thief?"', '2 - "Did you witness anything?"', '3 - "Did you witness anything?"']
-# answers = ["No. Absolutely not!\nHow DARE you accuse me of that!", "Select a valid command to ask a question.", "Select a valid command to ask a question."]
+rooms_list = ["living room", "kitchen", "bathroom", "bedroom"]
+print("You enter the house. You know who the killer is, you just have to prove if by finding the murder weapon.")
 
-# while (True):
-#     os.system('cls||clear')
-#     print("Sir Regenald")
-#     print(" Hello my good man.")
-#     print("-----")
-#     print("Ask a question:")
+# Rooms selection
+while (game_not_over):
+    os.system("cls||clear")
+    print("The house has four rooms:")
+    for room in rooms_list:
+        print(room)
+    print("Which room do you want to look in?")
+    selected_room = input()
 
-#     for a in questions:
-#         print(a)
-#     print(" e - exit")
+    if (selected_room == "living room"):
+        objects_in_room = ["dresser", "couch", "cat", "lamp", "newspaper"]
+    elif (selected_room == "kitchen"):
+        objects_in_room = ["dresser", "couch", "cat", "lamp", "newspaper"]
+    elif (selected_room == "bathroom"):
+        objects_in_room = ["dresser", "couch", "cat", "lamp", "newspaper"]
+    elif (selected_room == "bedroom"):
+        objects_in_room = ["dresser", "couch", "cat", "lamp", "newspaper"]
+    elif (selected_room == "e" or selected_room == "exit"):
+            break
+    else:
+        print("Select a room")
+        continue
 
+    print("You enter the " + selected_room + ".")
+    # Checking room
+    while (True):
+        os.system("cls||clear")
+        print("You find several objects. \nWhich one do you look under for the murder weapon?")
+        for object in objects_in_room:
+            print(object)
+        selected_object = input()
 
-#     the_input = input("Select: ")
-#     if (the_input == "e"):
-#         break
-#     print(answers[int(the_input)-1])
+        if (selected_object == "couch" and selected_room == "living room"):
+            print("You check under the couch. You find the knife.\nYou have the evidence to convict the killer.")
+            game_not_over = False
+            break
+        elif (selected_object == "e" or selected_object == "exit"):
+            break
+        elif (selected_object in objects_in_room):
+            print("You find nothing of note under the " + selected_object + ".\nYou need to keep searching.")
+        else:
+            print("Select an object")
