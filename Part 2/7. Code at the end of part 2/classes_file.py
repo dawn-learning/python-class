@@ -5,13 +5,14 @@ class Suspect():
         self.starter_dialogue = starter_dialogue
         self.questionsAndAnswers = []
 
-    def checkVilliany(self) -> bool:
+    def checkVillainy(self) -> bool:
         return False
 
     def addQuestionAndAnswer(self, question, answer):
         self.questionsAndAnswers.append((question, answer))
         return self
 
-class Villian(Suspect):
-    def checkVilliany(self) -> bool:
+class Villain(Suspect):
+    def checkVillainy(self) -> bool:
         return True
+

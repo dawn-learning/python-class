@@ -3,10 +3,10 @@ from classes_file import *
 
 characters = [
     Suspect(name="Suspect_1", starter_dialogue="a", location=(1, 1))
-        .addQuestionAndAnswer(question="Are you the theif?", answer="No. Absolutely not!\n How DARE you accuse me of that!")
-        .addQuestionAndAnswer(question="Are you the theif?", answer="No. Absolutely not!")
-        .addQuestionAndAnswer(question="Are you the theif?", answer="How DARE you accuse me of that!"), 
-    Villian(name="Suspect_2", starter_dialogue="a", location=(1, 1)),
+        .addQuestionAndAnswer(question="Are you the thief?", answer="No. Absolutely not!\n How DARE you accuse me of that!")
+        .addQuestionAndAnswer(question="Are you the thief?", answer="No. Absolutely not!")
+        .addQuestionAndAnswer(question="Are you the thief?", answer="How DARE you accuse me of that!"), 
+    Villain(name="Suspect_2", starter_dialogue="a", location=(1, 1)),
 ]
 
 def clear():
@@ -29,7 +29,8 @@ while True:
     selection = input()
     if (selection == "e"):
         break
-    selected_character = characters[selected_character_id := int(selection) - 1]
+    selected_character_id = int(selection) - 1
+    selected_character = characters[selected_character_id]
     dialogue = selected_character.starter_dialogue
     while True:
         clear()
