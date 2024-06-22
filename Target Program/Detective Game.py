@@ -11,11 +11,12 @@ class suspect():
         self.selected = []
         self.is_villian = is_villian
 
-class Application(tk.Tk):
+class Window(tk.Tk):
     def __init__(self):
         tk.Tk.__init__(self)
         self.resizable(False, False)
         self._frame = None
+        self.title("Detective Game")
         self.geometry("460x550")
         self.switch_frame(StartPage)
         self.configure(bg='#fefbdc')
@@ -233,5 +234,5 @@ suspects = [
     ),
 ]
 
-app = Application()
+app = Window()
 app.mainloop()
