@@ -17,9 +17,14 @@ print_player("go away")
 x = input()
 if (x == "1"):
     print_character("How's it going")
-    print_player("Bad")
-    print_player("Good")
-    print_player("MEH") # is the "meh" one
+    print_player("Bad1")
+    print_player("Good2")
+    print_player("MEH3") # is the "meh" one
+    x = input()
+    if (x == "2"):
+        print_character("How's it going again")
+    else:
+        print_character("How's it going again but not 2")
 elif (x == "2"):
     print_character("How's it going")
     print_player("import")
@@ -29,3 +34,5 @@ else:
     print_character("How's it going")
     print_player("Bad")
     print_player("Good")
+
+print_character("How's it going")

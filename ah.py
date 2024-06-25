@@ -27,7 +27,8 @@
 
 
 variables = {
-    "x": "content"
+    "x": "content",
+    "y": "5"
 }
 
 # t = 'if (x == "hi"):'
@@ -95,7 +96,7 @@ def split(text):
         to_deal_with = array.pop(array_spot).strip()
         for text_spot in range(len(to_deal_with)):
             found = False
-            for a in ["==", "(", ")", "*", "="]:
+            for a in ["==", "+=", "-=", "*=", "/=", "(", ")", "*", "=", "+", "/", "or", "and"]:
                 if (to_deal_with[text_spot : text_spot + len(a)] == a):
                     before = to_deal_with[0: text_spot]
                     if len(before) > 0:
@@ -116,23 +117,121 @@ def split(text):
 # print(split("(2 * (b == a)"))
 
 
-def recurive_parse(array):
+def recurive_parse(array, depth = 0):
     if (array[0] == "("):
-        depth = 1
-        array = recurive_parse(array[1:])
+        depth += 1
+        array = recurive_parse(array[1:], depth)
 
 
+def squish_array(array : list, DEBUG = False):
+    if DEBUG: print("\narray is", array)
+    for double_operator in ["+=", "-=", "*=", "/="]:
+        while (double_operator in array):
+            spot = array.index(double_operator)
+            array[spot] = double_operator[1]
+            array.insert(spot+1, double_operator[0])
+            array.insert(spot+1, array[spot-1])
+    if DEBUG: print("- double operators", array)
+    while ("(" in array):
+        parenthesis = []
+        parenthesis_added = False
+        if DEBUG: print("checking array:", array)
+        for i in range(len(array)):
+            if array[i] == "(":
+                parenthesis.append(")")
+                if str(parenthesis_added) == "False":
+                    parenthesis_added = i
+                if DEBUG: print(f"open parenthesis index = {i}")
+            elif array[i] == ")":
+                parenthesis.pop()
+                if DEBUG: print(f"close parenthesis index = {i}")
+            if str(parenthesis_added) != "False" and (len(parenthesis) == 0):
+                if DEBUG: print("Detected largest internal array:", array[parenthesis_added+1 : i])
+                result = squish_array(array[parenthesis_added+1 : i], DEBUG=DEBUG)
+                array = array[: parenthesis_added] + result + array[i+1:]
+                break
+                # for _ in range(i - parenthesis_added + 1):
+                #     array.pop(parenthesis_added)
+                # array.insert(parenthesis_added, result[0])
+    # return
+    if DEBUG: print("array (-parenthesis) is", array)
+    while len(array) > 1:
+        # Error checking
+        if (len(array) == 2):
+            array == [str(array[0]) + str(array[1])]
+            break
+        # Order of operations
+        for operator in ["*", "/", "+", "-", "and", "or", "==", "="]:
+            array, worked = check_operator(array, operator)
+            if (worked):
+                if DEBUG: print("Doing", operator)
+                if DEBUG and len(array) > 1: print(array)
+                break
+    if len(array) == 0: array = [None]
+    if DEBUG: print(f"returning array: {array}\n")
+    return array
 
 
+def check_operator(array, operator):
+    if operator in array:
+        index = array.index(operator)
+        left : list = array[index-1]
+        if type(left) == str:
+            left = left.strip()
+        if not operator == "=":
+            left = predict_and_convert_to_true_type(left)
+        right : list = predict_and_convert_to_true_type(array[index+1])
+        if operator == "*":
+            array = array[: index-1] + [left * right] + array[index + 2:]
+        elif operator == "/":
+            array = array[: index-1] + [left / right] + array[index + 2:]
+        elif operator == "+":
+            array = array[: index-1] + [left + right] + array[index + 2:]
+        elif operator == "-":
+            array = array[: index-1] + [left - right] + array[index + 2:]
+        elif operator == "and":
+            array = array[: index-1] + [left and right] + array[index + 2:]
+        elif operator == "or":
+            array = array[: index-1] + [left or right] + array[index + 2:]
+        elif operator == "==":
+            # print(f"left {left} of type {type(left)} is being compared to right {right} of type {type(right)}")
+            array = array[: index-1] + [left == right] + array[index + 2:]
+        elif operator == "=":
+            # print(f"variable {left} is being set to {right} or type {type(right)}")
+            variables[left] = right
+            array = array[: index-1] + array[index + 2:]
+        return array, True
+    return array, False
 
 
-# charcter_lines = []
-# player_options = []
+def predict_and_convert_to_true_type(unknown : str):
+    if type(unknown) != str:
+        return unknown
+    unknown = unknown.strip()
+    if (unknown.startswith("'") and unknown.endswith("'")) or (unknown.startswith('"') and unknown.endswith('"')):
+        return str(unknown[1 : -1])
+    if "." in unknown:
+        try:
+            return float(unknown)
+        except:
+            pass
+    try:
+        return int(unknown)
+    except:
+        pass
+    if (unknown == "True"): return True
+    if (unknown == "False"): return False
+    for variable in variables.keys():
+        if unknown == variable:
+            # print(f"Replacing {variable} with {variables[variable]}")
+            return variables[variable]
+    return unknown
 
+# statement = "if ((5 / 2) + y * (5/2)) * 0 == 0:"
+# statement = "if (y /= 5):"
 
-
-
-
+# If statement is true, do all indented statements under it and delete all else statments at same level.
+# If statement is false, skip to next not indented statement.
 
 
 
@@ -269,21 +368,23 @@ def parse_function(line, function_name):
 
 
 
+def get_their_code():
+    their_code = []
+    with open("test.py", "r") as f:
+        while True:
+            line = f.readline()
+            if not line: break
+            # Removes lines that are not code
+            if (line == "\n"): continue
+            if line.lstrip().startswith("#"): continue
+            if "#" in line:
+                line = line[:line.index("#")]
+            # Removes import statements
+            if "import" in line and not ( "'" in line or '"' in line): continue
+            # Appends the rest
+            their_code.append(line[:-1])
+    return their_code
 
-their_code = []
-with open("test.py", "r") as f:
-    while True:
-        line = f.readline()
-        if not line: break
-        # Removes lines that are not code
-        if (line == "\n"): continue
-        if line.lstrip().startswith("#"): continue
-        if "#" in line:
-            line = line[:line.index("#")]
-        # Removes import statements
-        if "import" in line and not ( "'" in line or '"' in line): continue
-        # Appends the rest
-        their_code.append(line[:-1])
 
 # to_parse = [their_code]
 # to_parse_location = 0
@@ -292,47 +393,156 @@ with open("test.py", "r") as f:
 # for line in lines:
 #     if "if" in lines:
 #         print("found")
-line_i = 0
-options = []
-for line in their_code:
-    line_i += 1
-    # print(line)
-    if ("print_player" in line):
-        parts = parse_function(line, "print_player")
-        whole = ""
-        for a in parts:
-            whole = " " + a
-        if whole != "":
-            whole = whole[1:]
-        options.append(whole)
-    else:
-        if len(options) > 0:
+
+
+def parse(their_code, user_selection = None) -> int:
+    if their_code == []: return [], "Ended"
+    # print(len(their_code))
+    their_code_active = their_code[len(their_code)-1][0]
+    line_i = their_code[len(their_code)-1][1]
+
+    if user_selection != None:
+        their_code_active[line_i] = their_code_active[line_i].replace("input()", f'"{user_selection}"')
+
+    options = []
+    while line_i < len(their_code_active):
+        line = their_code_active[line_i]
+        line_i += 1
+        # print(line)
+        # Check to see if line is print_player
+        if ("print_player" in line):
+            parts = parse_function(line, "print_player")
+            whole = ""
+            for a in parts:
+                whole = " " + a
+            if whole != "":
+                whole = whole[1:]
+            options.append(whole)
+        else:
+            # If it is not another print_player, add all print_players up to this point to last action
+            if len(options) > 0:
+                if (len(actions) < 1): 
+                    actions.append({"user_options" : options})
+                else:
+                    actions[len(actions)-1]["user_options"] = options
+                options = []
+            # Other possible line contents
+            if ("input" in line and not ("'" in line or '"' in line)):
+                line_i -= 1
+                their_code[len(their_code)-1][1] = line_i
+                return their_code, "Paused"
+            elif ("print_character" in line):
+                parts = parse_function(line, "print_character")
+                if len(parts) < 1:
+                    parts.append("")
+                if len(parts) > 2:
+                    raise Exception(f"{line_i} : The function print_character takes at most two arguments")
+                dictionary = {
+                    "character_speaks" : parts[0]
+                }
+                if len(parts) > 1:
+                    dictionary["character_portrait_changes"] = parts[1]
+                actions.append(dictionary)
+            else:
+                if line.startswith("elif"):
+                    line = "if" + line.removeprefix("elif")
+                if line.startswith("else"):
+                    if not (line.strip() == "else:"):
+                        raise Exception('Incorrectly formated "else:"')
+                    line = "if True:"
+                if line.startswith("if"):
+                    if not line.endswith(":"):
+                        raise Exception("If statement does not include a semicolon at the end")
+                    line = line.removeprefix("if").removesuffix(":").strip()
+                    line = squish_array(split(line), DEBUG=False)[0]
+                    if line == None:
+                        raise Exception('An "if" statement cannot be empty.\n You probably used "=" instead of "==".')
+                    if line:
+                        print("If statement IS true")
+                        child_statements = []
+                        while(line_i < len(their_code_active) and their_code_active[line_i].startswith("    ")):
+                            child_statements.append(their_code_active[line_i].removeprefix("    "))
+                            line_i += 1
+                        while line_i < len(their_code_active) and (their_code_active[line_i].startswith("elif") or their_code_active[line_i].startswith("else")):
+                            line_i +=1
+                            while(their_code_active[line_i].startswith("    ")):
+                                line_i += 1
+                                if (line_i >= len(their_code_active)):
+                                    break
+                                # else:
+                                #     print(their_code_active[line_i])
+                            if line_i >= len(their_code_active):
+                                break
+                        temp = their_code_active[line_i] if line_i < len(their_code_active) else "EOF"
+                        print(f"line_i  is {line_i } ({temp})")
+                        their_code[len(their_code)-1][1] = line_i
+                        their_code.append([child_statements, 0])
+                        their_code, result  = parse(their_code)
+                        if (result == "Paused"):
+                            return their_code, result
+                        continue
+                    else:
+                        print("If statement IS false")
+                        line_i += 1
+                        while(line_i < len(their_code_active) and their_code_active[line_i].startswith("    ")):
+                            line_i += 1
+                else:
+                    line = squish_array(split(line), DEBUG=True)[0]
+
+
+
+
+                # split_line = split(line)
+
+
+                # for i in range(len(split_line)):
+                #     for variable in variables.keys():
+                #         if split_line[i].strip() == variable:
+                #             split_line[i] = variables[variable]
+                # print(f" split line = {split_line}")
+                # # print(line)
+                # if len(split_line) == 3:
+                #     if (split_line[1] == "="):
+                #         variables[split_line[0].strip()] = split_line[2]
+                #         print(variables)
+    # If it is not another print_player, add all print_players up to this point to last action
+    if len(options) > 0:
+        if (len(actions) < 1): 
             actions.append({"user_options" : options})
-            options = []
-        if ("input" in line and not ("'" in line or '"' in line)):
-            line_i -= 1
-            break
-        if ("print_character" in line):
-            parts = parse_function(line, "print_character")
-            if len(parts) < 1:
-                parts.append("")
-            if len(parts) > 2:
-                raise Exception(f"{line_i} : The function print_character takes at most two arguments")
-            dictionary = {
-                "character_speaks" : parts[0]
-            }
-            if len(parts) > 1:
-                dictionary["character_portrait_changes"] = parts[1]
-            actions.append(dictionary)
+        else:
+            actions[len(actions)-1]["user_options"] = options
+        options = []
+    their_code[len(their_code)-1][1] = line_i
+    return their_code, "Ended"
 
 
-for a in range(line_i):
-    print(their_code[a])
+def print_actions():
+    # print()
 
-for a in actions:
-    print(a)
+    # for a in range(line_i):
+    #     print(their_code[a])
 
+    # print()
 
+    for a in actions:
+        print(a)
+
+their_code = [[get_their_code(), 0]]
+
+their_code, status = parse(their_code)
+
+# print("\n", "\n", "\n")
+
+print_actions()
+their_code, status = parse(their_code, user_selection=input())
+print_actions()
+their_code, status = parse(their_code, user_selection=input())
+print_actions()
+
+for a in their_code:
+    print(f"length = {len(a[0])}, i = {a[1]}")
+
+print(their_code[len(their_code)-1][0])
 
 
 
