@@ -13,13 +13,13 @@ def flatten_text(*text):
         content += str(text[i])
     return content
 
-def print_character(text, mood = None):
+def print_character(*text, mood = None):
     global lines_since_character
     global character_mood
     if mood: character_mood = mood
     if lines_since_character != 0:
         print(f"\n{character_name} ({character_mood}):")
-    print(f" {text}")
+    print(f" {flatten_text(*text)}")
     lines_since_character = 0
 
 def print_player(*text):

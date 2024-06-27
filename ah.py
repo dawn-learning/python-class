@@ -395,99 +395,125 @@ def get_their_code():
 #         print("found")
 
 
-def parse(their_code, user_selection = None) -> int:
+def line_of_i(their_code_active, line_i):
+    return their_code_active[line_i] if line_i < len(their_code_active) else "EOF"
+
+def parse(their_code : list, user_selection = None, DEBUG = False) -> tuple[list, str]:
+    """
+    returns status Paused or Ended
+    """
     if their_code == []: return [], "Ended"
-    # print(len(their_code))
     their_code_active = their_code[len(their_code)-1][0]
     line_i = their_code[len(their_code)-1][1]
+    if DEBUG: print(f"Starting new parse run with code of length {len(their_code_active)}")
 
     if user_selection != None:
         their_code_active[line_i] = their_code_active[line_i].replace("input()", f'"{user_selection}"')
 
     options = []
-    while line_i < len(their_code_active):
-        line = their_code_active[line_i]
-        line_i += 1
-        # print(line)
-        # Check to see if line is print_player
-        if ("print_player" in line):
-            parts = parse_function(line, "print_player")
-            whole = ""
-            for a in parts:
-                whole = " " + a
-            if whole != "":
-                whole = whole[1:]
-            options.append(whole)
-        else:
-            # If it is not another print_player, add all print_players up to this point to last action
-            if len(options) > 0:
-                if (len(actions) < 1): 
-                    actions.append({"user_options" : options})
-                else:
-                    actions[len(actions)-1]["user_options"] = options
-                options = []
-            # Other possible line contents
-            if ("input" in line and not ("'" in line or '"' in line)):
-                line_i -= 1
-                their_code[len(their_code)-1][1] = line_i
-                return their_code, "Paused"
-            elif ("print_character" in line):
-                parts = parse_function(line, "print_character")
-                if len(parts) < 1:
-                    parts.append("")
-                if len(parts) > 2:
-                    raise Exception(f"{line_i} : The function print_character takes at most two arguments")
-                dictionary = {
-                    "character_speaks" : parts[0]
-                }
-                if len(parts) > 1:
-                    dictionary["character_portrait_changes"] = parts[1]
-                actions.append(dictionary)
+    while (len(their_code) > 0):
+        their_code_active = their_code[len(their_code)-1][0]
+        line_i = their_code[len(their_code)-1][1]
+        while line_i < len(their_code_active):
+            line = their_code_active[line_i]
+            # if DEBUG: print(f"{line_i}/{len(their_code_active)}")
+            # if DEBUG: print(line)
+            # Check to see if line is print_player
+            if ("print_player" in line):
+                parts = parse_function(line, "print_player")
+                whole = ""
+                for a in parts:
+                    whole = " " + a
+                if whole != "":
+                    whole = whole[1:]
+                options.append(whole)
             else:
-                if line.startswith("elif"):
-                    line = "if" + line.removeprefix("elif")
-                if line.startswith("else"):
-                    if not (line.strip() == "else:"):
-                        raise Exception('Incorrectly formated "else:"')
-                    line = "if True:"
-                if line.startswith("if"):
-                    if not line.endswith(":"):
-                        raise Exception("If statement does not include a semicolon at the end")
-                    line = line.removeprefix("if").removesuffix(":").strip()
-                    line = squish_array(split(line), DEBUG=False)[0]
-                    if line == None:
-                        raise Exception('An "if" statement cannot be empty.\n You probably used "=" instead of "==".')
-                    if line:
-                        print("If statement IS true")
-                        child_statements = []
-                        while(line_i < len(their_code_active) and their_code_active[line_i].startswith("    ")):
-                            child_statements.append(their_code_active[line_i].removeprefix("    "))
-                            line_i += 1
-                        while line_i < len(their_code_active) and (their_code_active[line_i].startswith("elif") or their_code_active[line_i].startswith("else")):
-                            line_i +=1
-                            while(their_code_active[line_i].startswith("    ")):
-                                line_i += 1
-                                if (line_i >= len(their_code_active)):
-                                    break
-                                # else:
-                                #     print(their_code_active[line_i])
-                            if line_i >= len(their_code_active):
-                                break
-                        temp = their_code_active[line_i] if line_i < len(their_code_active) else "EOF"
-                        print(f"line_i  is {line_i } ({temp})")
-                        their_code[len(their_code)-1][1] = line_i
-                        their_code.append([child_statements, 0])
-                        their_code, result  = parse(their_code)
-                        if (result == "Paused"):
-                            return their_code, result
-                        continue
+                # If it is not another print_player, add all print_players up to this point to last action
+                if len(options) > 0:
+                    if (len(actions) < 1): 
+                        actions.append({"user_options" : options})
                     else:
-                        print("If statement IS false")
-                        line_i += 1
-                        while(line_i < len(their_code_active) and their_code_active[line_i].startswith("    ")):
-                            line_i += 1
+                        actions[len(actions)-1]["user_options"] = options
+                    options = []
+                # Other possible line contents
+                if ("input" in line and not ("'" in line or '"' in line)):
+                    their_code[len(their_code)-1][1] = line_i
+                    return their_code, "Paused"
+                elif ("print_character" in line):
+                    if DEBUG: print(line)
+                    parts = parse_function(line, "print_character")
+                    if len(parts) < 1:
+                        parts.append("")
+                    if len(parts) > 2:
+                        raise Exception(f"{line_i} : The function print_character takes at most two arguments")
+                    dictionary = {
+                        "character_speaks" : parts[0]
+                    }
+                    if len(parts) > 1:
+                        dictionary["character_portrait_changes"] = parts[1]
+                    actions.append(dictionary)
+                    if DEBUG: print("action added")
                 else:
-                    line = squish_array(split(line), DEBUG=True)[0]
+                    if line.startswith("else"):
+                        if not (line.strip() == "else:"):
+                            raise Exception('Incorrectly formated "else:"')
+                        line = "if True:"
+                    if line.startswith("if") or line.startswith("elif"):
+                        if not line.endswith(":"):
+                            raise Exception("If statement does not include a semicolon at the end")
+                        if line.startswith("if"):
+                            line = line.removeprefix("if")
+                        elif line.startswith("elif"):
+                            line = line.removeprefix("elif")
+                        line = line.removesuffix(":").strip()
+                        line = squish_array(split(line), DEBUG=False)[0]
+                        if line == None:
+                            raise Exception('An "if" statement cannot be empty.\n You probably used "=" instead of "==".')
+                        if line:
+                            if DEBUG: print("If statement IS true")
+                            if DEBUG: print(f" and line_i is {line_i}")
+                            if DEBUG: print(f" and the line is {line_of_i(their_code_active, line_i)}")
+                            child_statements = []
+                            line_i += 1
+                            while(line_i < len(their_code_active) and their_code_active[line_i].startswith("    ")):
+                                child_statements.append(their_code_active[line_i].removeprefix("    "))
+                                line_i += 1
+                            while line_i < len(their_code_active) and (their_code_active[line_i].startswith("elif") or their_code_active[line_i].startswith("else")):
+                                line_i +=1
+                                while(their_code_active[line_i].startswith("    ")):
+                                    line_i += 1
+                                    if (line_i >= len(their_code_active)):
+                                        break
+                                    # else:
+                                    #     if DEBUG: print(their_code_active[line_i])
+                                if line_i >= len(their_code_active):
+                                    break
+                            if DEBUG: print(f"{len(their_code_active)}")
+                            if DEBUG: print(f"line_i  is {line_i } ({line_of_i(their_code_active, line_i)})")
+                            their_code[len(their_code)-1][1] = line_i
+                            their_code.append([child_statements, 0])
+                            if DEBUG: print(f"running parse again with {len(child_statements)} child statements")
+                            their_code, result  = parse(their_code)
+                            # if (result == "Paused"):
+                            return their_code, result
+                            # their_code.pop()
+                            # their_code_active = their_code[len(their_code)-1][0]
+                            # line_i = their_code[len(their_code)-1][1]
+                            # line_i += 1
+                            continue
+                        else:
+                            if DEBUG: print(f"If statement {line_of_i(their_code_active, line_i)} is false")
+                            line_i += 1
+                            while(line_i < len(their_code_active) and their_code_active[line_i].startswith("    ")):
+                                line_i += 1
+                            if DEBUG: print(f" and the next line not a part of the if is {line_of_i(their_code_active, line_i)}")
+                            line_i -= 1
+                    else:
+                        line = squish_array(split(line), DEBUG=False)[0]
+            if DEBUG: print("+1")
+            line_i += 1
+        their_code.pop()
+
 
 
 
@@ -512,7 +538,9 @@ def parse(their_code, user_selection = None) -> int:
         else:
             actions[len(actions)-1]["user_options"] = options
         options = []
-    their_code[len(their_code)-1][1] = line_i
+    if len(their_code) > 0:
+        print(f"len of their code {len(their_code)}")
+        their_code[len(their_code)-1][1] = line_i
     return their_code, "Ended"
 
 
@@ -527,22 +555,33 @@ def print_actions():
     for a in actions:
         print(a)
 
+
+
+
+
+
+
+
 their_code = [[get_their_code(), 0]]
 
-their_code, status = parse(their_code)
+status = None
+while status == "Paused" or status == None:
+    while len(actions) > 0:
+        print(actions.pop(0))
+    if status == None:
+        their_code, status = parse(their_code)
+    else:
+        their_code, status = parse(their_code, user_selection=input())
 
-# print("\n", "\n", "\n")
+while len(actions) > 0:
+    print(actions.pop(0))
 
-print_actions()
-their_code, status = parse(their_code, user_selection=input())
-print_actions()
-their_code, status = parse(their_code, user_selection=input())
-print_actions()
 
-for a in their_code:
-    print(f"length = {len(a[0])}, i = {a[1]}")
+# print_actions()
+# for a in their_code:
+#     print(f"length = {len(a[0])}, i = {a[1]}")
 
-print(their_code[len(their_code)-1][0])
+
 
 
 
