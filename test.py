@@ -8,7 +8,7 @@ from interviewprint import print_character, print_player
 # if (x == 1):
 #     print(x)
 
-print_character("Hi player", mood="Happy")
+print_character("Hi player", mood="angry")
 print_character("Going well?")
 print_player("HI")
 print_player("How's it going")

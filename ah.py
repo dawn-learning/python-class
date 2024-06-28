@@ -288,8 +288,10 @@ actions : list[dict]= [
 
 
 class Window(tk.Tk):
-    def __init__(self) -> None:
+    def __init__(self, code) -> None:
         tk.Tk.__init__(self)
+
+        self.code = code
 
         # Used to allow the user to interupt typing out the character's text
         self.type_called_count = 0
@@ -331,12 +333,13 @@ class Window(tk.Tk):
             time.sleep(0.05)
 
     def dialogue_option_pressed(self, i):
-        # prep for next
-        print(i)
-
+        if len(actions) == 0:
+            # prep for next
+            i += 1
+            status = their_code.run_to_pause_or_end(str(i))
+            if status == Status.COMPLETED:
+                actions.append({"Note": "Game Over."})
         self.next()
-
-
 
     def next(self):
         if len(actions) == 0: return
@@ -350,14 +353,9 @@ class Window(tk.Tk):
             self.portrait.image = image
         if "character_speaks" in keys:
             self.Type(current_actions["character_speaks"])
-        # print()
-        # print(len(actions))
         if "user_options" in keys:
             self.create_player_dialogue_frame(current_actions["user_options"])
 
-
-# Window()
-# tk.mainloop()
 
 
 
@@ -498,32 +496,6 @@ class Code():
 
 
 
-# Cool techiniques I want to save somewhere, delete after next push
-class MessableFunction():
-    def find_function_of_name(name : str):
-        # if name not in MessableFunction.__get_all_messableFunctions():
-        #     raise Exception("Not a MessableFunction")
-        try:
-            return MessableFunction.__dict__[name]
-        except:
-            raise Exception(f"{name}() is not a MessableFunction")
-    def get_all_messableFunctions():
-        output = []
-        for a in dir(MessableFunction):
-            if not a.startswith("__"):
-                output.append(a)
-        output.remove("find_function_of_name")
-        output.remove("get_all_messableFunctions")
-        return output
-
-def a(*text, name="main"):
-    string : str = ""
-    for a in text:
-        string += " " + a
-    print(string.lstrip() + " " + name)
-
-
-
 class CodeSegment():
     def __init__(self, lines : list[str], position : int = 0, repeat = False, DEBUG : bool = False) -> None:
         self.lines = lines
@@ -533,7 +505,7 @@ class CodeSegment():
         self.completed = False
 
     def check_for_and_run_function(self, function):
-        DEBUG = True
+        DEBUG = False
         def sort_parameters(full_list):
             def check_if_named(line):
                 if "=" not in line:
@@ -899,17 +871,18 @@ def print_player(*text):
 
 
 
-
-
-
-
 their_code = Code(get_their_code())
 status = their_code.run_to_pause_or_end()
-while status == Status.PAUSED:
-    print_actions()
-    status = their_code.run_to_pause_or_end(input())
-print_actions()
-print(status)
+Window(their_code)
+tk.mainloop()
+
+
+
+
+
+
+
+
 # segment = CodeSegment(['print_character("Hi player", mood="Happy")', 'print_character("Going well?")', 'print_player("HI")', 'print_player("How\'s it going")', 'print_player("go away")', "input()"])
 # parse_to_pause_or_end(segment)
 # print_actions()
@@ -932,7 +905,7 @@ print(status)
 
 
 
-
+# ---- test saved data on phone (emoji, podcasts)
 
 
 
