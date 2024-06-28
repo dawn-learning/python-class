@@ -24,7 +24,7 @@ def print_character(*text, mood = None):
 
 def print_player(*text):
     global lines_since_character
-    if (lines_since_character == 0):
+    if (lines_since_character < 1):
         print("Select a response to ask:")
     lines_since_character += 1
     print(f" {lines_since_character} - {flatten_text(*text)}")

@@ -197,7 +197,7 @@ def check_operator(array, operator):
             # print(f"left {left} of type {type(left)} is being compared to right {right} of type {type(right)}")
             array = array[: index-1] + [left == right] + array[index + 2:]
         elif operator == "=":
-            # print(f"variable {left} is being set to {right} or type {type(right)}")
+            print(f"variable {left} is being set to {right} or type {type(right)}")
             variables[left] = right
             array = array[: index-1] + array[index + 2:]
         return array, True
@@ -270,6 +270,7 @@ def get_portrait_options():
 
 
 
+global character_mood
 character_mood = "normal"
 
 actions : list[dict]= [
@@ -395,14 +396,300 @@ def get_their_code():
 #         print("found")
 
 
-def line_of_i(their_code_active, line_i):
-    return their_code_active[line_i] if line_i < len(their_code_active) else "EOF"
+from enum import Enum
 
-def parse(their_code : list, user_selection = None, DEBUG = False) -> tuple[list, str]:
+class Status(Enum):
+    COMPLETED = 0
+    PAUSED = 1
+    CONTINUING = 2
+
+
+class Code():
+    def __init__(self, code : str, DEBUG : bool = False) -> None:
+        self.DEBUG = DEBUG
+        self._code : list[CodeSegment] = [CodeSegment(code)]
+        self._update_active()
+
+    def _update_active(self) -> None:
+        self._active_code : CodeSegment = self._code[len(self._code)-1]
+        if self.DEBUG: print("New focused line:")
+        if self.DEBUG: print(f" {self._active_code.position}/{len(self._active_code.lines)}")
+        if self.DEBUG: print(f" {self._active_code.lines[self._active_code.position]}")
+
+    def indent(self, indent_code : list[str]) -> None:
+        self._code.append(CodeSegment(indent_code))
+        self._update_active()
+
+    def change_DEBUG(self, DEBUG : bool) -> None:
+        self.DEBUG = DEBUG
+
+    def next(self) -> Status:
+        self._active_code.next()
+        while self._active_code.completed:
+            if self.pop() == Status.COMPLETED:
+                return Status.COMPLETED
+        return Status.CONTINUING
+
+    def is_if_statement(self):
+        return self._active_code.is_if_statement()
+
+    def pop(self) -> Status:
+        self._code.pop()
+        if self._code == []:
+            return Status.COMPLETED
+        self._update_active()
+        return Status.CONTINUING
+
+    def find_next_not_indented(self) -> Status:
+        if self._active_code.find_next_not_indented() == Status.COMPLETED:
+            return self.pop()
+        return Status.CONTINUING
+
+    def run_if_statement(self, boolean : bool):
+        result = self._active_code.run_if_statement(boolean)
+        if result == None: return
+        if not type(result) == CodeSegment:
+            raise Exception(f"Result should be a None or a CodeSegment\n result = {result}")
+        self.indent(result)
+
+
+    def replace_input_with(self, user_input):
+        return self._active_code.replace_input_with(user_input)
+
+    def is_completed(self):
+        return self._code == []
+
+    def detect_pause(self):
+        return self._active_code.detect_pause()
+
+    def run_to_pause_or_end(self, user_input : str = None):
+        def check_functions(segment):
+            for function in [print_character, print_player]:
+                if segment.check_for_and_run_function(function):
+                    return True
+            return False
+
+        if user_input:
+            self.replace_input_with(user_input)
+        while not self.is_completed():
+            try:
+                self._active_code.get_line()
+            except:
+                print(len(self._code))
+                print(len(self._active_code.lines))
+                print(self._active_code.position)
+
+            if self.detect_pause():
+                return Status.PAUSED
+            elif check_functions(self._active_code): 
+                self.next()
+                continue
+            elif (result := self.is_if_statement()) != None:
+                print("is an if statement")
+                if (result := self._active_code.run_if_statement(result)) != None:
+                    self.indent(result)
+                continue
+            else:
+                print(f"if statement result is {result}")
+                print("Assuming must be of another line type")
+                self._active_code.other_line_type()
+            self.next()
+        return Status.COMPLETED
+
+
+
+# Cool techiniques I want to save somewhere, delete after next push
+class MessableFunction():
+    def find_function_of_name(name : str):
+        # if name not in MessableFunction.__get_all_messableFunctions():
+        #     raise Exception("Not a MessableFunction")
+        try:
+            return MessableFunction.__dict__[name]
+        except:
+            raise Exception(f"{name}() is not a MessableFunction")
+    def get_all_messableFunctions():
+        output = []
+        for a in dir(MessableFunction):
+            if not a.startswith("__"):
+                output.append(a)
+        output.remove("find_function_of_name")
+        output.remove("get_all_messableFunctions")
+        return output
+
+def a(*text, name="main"):
+    string : str = ""
+    for a in text:
+        string += " " + a
+    print(string.lstrip() + " " + name)
+
+
+
+class CodeSegment():
+    def __init__(self, lines : list[str], position : int = 0, repeat = False, DEBUG : bool = False) -> None:
+        self.lines = lines
+        self.position = position
+        self.repeat = repeat
+        self.DEBUG = DEBUG
+        self.completed = False
+
+    def check_for_and_run_function(self, function):
+        DEBUG = True
+        def sort_parameters(full_list):
+            def check_if_named(line):
+                if "=" not in line:
+                    return False
+                temp = line[:line.index("=")]
+                if "'" in temp or '"' in temp:
+                    return False
+                return True
+
+            unnamed_parameters = []
+            named_parameters = {}
+            while len(full_list) > 0:
+                input = full_list.pop(0)
+                if check_if_named(input):
+                    parameter, value = input.split("=")
+                    named_parameters[parameter] = predict_and_convert_to_true_type(value)
+                    continue
+                else:
+                    unnamed_parameters.append(predict_and_convert_to_true_type(input))
+            return unnamed_parameters, named_parameters
+
+        # Check if the line contains the function
+        function_name = function.__name__
+        if DEBUG: print(f"Checking line to see if it calls {function_name}...", end="")
+        line = self.lines[self.position]
+        if not line.startswith(function_name):
+            if DEBUG: print(" Nope")
+            return False
+        if DEBUG: print(" Yep")
+        # Extract the parameters
+        full_list = parse_function(line, function_name)
+        if DEBUG: print(f" All parameters: [{full_list}]")
+        unnamed_parameters, named_parameters = sort_parameters(full_list)
+        if DEBUG: print(f" Sorted into unnamed: {unnamed_parameters} and named: {named_parameters}")
+        # Run the function
+        function(*unnamed_parameters, **named_parameters)
+        return True
+
+    def change_DEBUG(self, DEBUG : bool) -> None:
+        self.DEBUG = DEBUG
+
+    def next(self) -> None:
+        """
+        Moves the position to the next line.\n
+        - Returns COMPLETED if reaches end of CodeSegment by doing so.\n
+        - Returns CONTINUING otherwise.
+        """
+        self.position += 1
+        if self.position >= len(self.lines):
+            self.completed = True
+            return Status.COMPLETED
+        Status.CONTINUING
+
+    def get_line(self) -> str:
+        return self.lines[self.position]
+
+    def is_if_statement(self):
+        """
+        - returns None if not an if statement
+        - returns the True/False falue of the statement if is an if statement
+        Note: if, elif, and else statements all count as a type of if statement for this function's purposes
+        """
+        def turn_line_into_True_or_False(line : str) -> bool:
+            if not line.endswith(":"):
+                raise Exception("If statement does not include a semicolon at the end")
+            if line.startswith("if"):
+                line = line.removeprefix("if")
+            elif line.startswith("elif"):
+                line = line.removeprefix("elif")
+            line = line.removesuffix(":").strip()
+            line = squish_array(split(line), DEBUG=False)[0]
+            if line == None:
+                raise Exception('An "if" statement cannot be empty.\n You probably used "=" instead of "==".')
+            return line
+
+        line = self.get_line()
+        startsw = line.startswith("if")
+        if line.startswith("else"):
+            if not (line.strip() == "else:"):
+                raise Exception('Incorrectly formated "else:"')
+            line = "if True:"
+        if not (line.startswith("if") or line.startswith("elif")):
+            return None
+        return turn_line_into_True_or_False(line)
+
+    def run_if_statement(self, boolean):
+        if self.DEBUG: print(f"If statement is {boolean}")
+        if self.DEBUG: print(f" and line_i is {self.position}")
+        if self.DEBUG: print(f" and the line is {print_line(self.lines, self.position)}")
+        if boolean:
+            # If statement is true
+            self.next()
+            if self.completed:
+                raise Exception("If type statements must have some code under them.")
+            # Grab all lines in the if
+            indeneted_statements = []
+            while(self.lines[self.position].startswith("    ")):
+                indeneted_statements.append(self.lines[self.position].removeprefix("    "))
+                self.next()
+                if self.completed: break
+            if self.completed:
+                # Return the CodeSegment that was under the if
+                return indeneted_statements
+            # Skip over any elif or else statements after the if
+            while self.lines[self.position].startswith("elif") or self.lines[self.position].startswith("else"):
+                self.find_next_not_indented()
+                if self.completed: break
+            # Return the CodeSegment that was under the if
+                # if self.DEBUG: print(f"{len(self.lines)}")
+                # if self.DEBUG: print(f"line_i  is {self.position} ({print_line(self.lines, self.position)})")
+            return indeneted_statements
+        else:
+            # If statement is false
+            # Skip over all lines in the if
+            self.find_next_not_indented()
+            return None
+
+    def find_next_not_indented(self) -> Status:
+        """
+        Moves the position to the next line that is not indented.\n
+        - Returns COMPLETED if reaches end of CodeSegment by doing so.\n
+        - Returns CONTINUING otherwise.
+        """
+        # At an if or elif statement
+        # +1 moves to first line in the indent (1 line must exist, otherwise error in code editor)
+        self.next()
+        # Skip over each line with an indent
+        while(self.position < len(self.lines) and self.lines[self.position].startswith("    ")):
+            if self.next() == Status.COMPLETED:
+                # Could have hit end of file
+                return Status.COMPLETED
+        # self.position should be set to next line not a part of the if or elif satement
+        if self.DEBUG: print(f" and the next line not a part of the if is {print_line(self.lines, self.position)}")
+        return Status.CONTINUING
+
+    def detect_pause(self):
+        line = self.get_line()
+        return "input" in line and not ("'" in line or '"' in line)
+
+    def replace_input_with(self, new_content):
+        if (type(new_content)) == str:
+            new_content = f'"{new_content}"'
+        self.lines[self.position] = self.get_line().replace("input()", new_content)
+
+    def other_line_type(self):
+        DEBUG = True
+        self.lines[self.position] = squish_array(split(self.get_line()), DEBUG=DEBUG)[0]
+
+
+def print_line(lines, position):
+    return lines[position] if position < len(lines) else "EOF"
+
+def parse(their_code : list, user_selection = None, DEBUG = False) -> tuple[list, Status]:
     """
-    returns status Paused or Ended
     """
-    if their_code == []: return [], "Ended"
+    if their_code == []: return [], Status.COMPLETED
     their_code_active = their_code[len(their_code)-1][0]
     line_i = their_code[len(their_code)-1][1]
     if DEBUG: print(f"Starting new parse run with code of length {len(their_code_active)}")
@@ -416,8 +703,6 @@ def parse(their_code : list, user_selection = None, DEBUG = False) -> tuple[list
         line_i = their_code[len(their_code)-1][1]
         while line_i < len(their_code_active):
             line = their_code_active[line_i]
-            # if DEBUG: print(f"{line_i}/{len(their_code_active)}")
-            # if DEBUG: print(line)
             # Check to see if line is print_player
             if ("print_player" in line):
                 parts = parse_function(line, "print_player")
@@ -438,7 +723,7 @@ def parse(their_code : list, user_selection = None, DEBUG = False) -> tuple[list
                 # Other possible line contents
                 if ("input" in line and not ("'" in line or '"' in line)):
                     their_code[len(their_code)-1][1] = line_i
-                    return their_code, "Paused"
+                    return their_code, Status.PAUSED
                 elif ("print_character" in line):
                     if DEBUG: print(line)
                     parts = parse_function(line, "print_character")
@@ -472,7 +757,7 @@ def parse(their_code : list, user_selection = None, DEBUG = False) -> tuple[list
                         if line:
                             if DEBUG: print("If statement IS true")
                             if DEBUG: print(f" and line_i is {line_i}")
-                            if DEBUG: print(f" and the line is {line_of_i(their_code_active, line_i)}")
+                            if DEBUG: print(f" and the line is {print_line(their_code_active, line_i)}")
                             child_statements = []
                             line_i += 1
                             while(line_i < len(their_code_active) and their_code_active[line_i].startswith("    ")):
@@ -489,12 +774,12 @@ def parse(their_code : list, user_selection = None, DEBUG = False) -> tuple[list
                                 if line_i >= len(their_code_active):
                                     break
                             if DEBUG: print(f"{len(their_code_active)}")
-                            if DEBUG: print(f"line_i  is {line_i } ({line_of_i(their_code_active, line_i)})")
+                            if DEBUG: print(f"line_i  is {line_i } ({print_line(their_code_active, line_i)})")
                             their_code[len(their_code)-1][1] = line_i
                             their_code.append([child_statements, 0])
                             if DEBUG: print(f"running parse again with {len(child_statements)} child statements")
                             their_code, result  = parse(their_code)
-                            # if (result == "Paused"):
+                            # if (result == status.PAUSED):
                             return their_code, result
                             # their_code.pop()
                             # their_code_active = their_code[len(their_code)-1][0]
@@ -502,11 +787,11 @@ def parse(their_code : list, user_selection = None, DEBUG = False) -> tuple[list
                             # line_i += 1
                             continue
                         else:
-                            if DEBUG: print(f"If statement {line_of_i(their_code_active, line_i)} is false")
+                            if DEBUG: print(f"If statement {print_line(their_code_active, line_i)} is false")
                             line_i += 1
                             while(line_i < len(their_code_active) and their_code_active[line_i].startswith("    ")):
                                 line_i += 1
-                            if DEBUG: print(f" and the next line not a part of the if is {line_of_i(their_code_active, line_i)}")
+                            if DEBUG: print(f" and the next line not a part of the if is {print_line(their_code_active, line_i)}")
                             line_i -= 1
                     else:
                         line = squish_array(split(line), DEBUG=False)[0]
@@ -541,7 +826,7 @@ def parse(their_code : list, user_selection = None, DEBUG = False) -> tuple[list
     if len(their_code) > 0:
         print(f"len of their code {len(their_code)}")
         their_code[len(their_code)-1][1] = line_i
-    return their_code, "Ended"
+    return their_code, Status.COMPLETED
 
 
 def print_actions():
@@ -562,19 +847,16 @@ def print_actions():
 
 
 
-their_code = [[get_their_code(), 0]]
+# their_code = [[get_their_code(), 0]]
 
-status = None
-while status == "Paused" or status == None:
-    while len(actions) > 0:
-        print(actions.pop(0))
-    if status == None:
-        their_code, status = parse(their_code)
-    else:
-        their_code, status = parse(their_code, user_selection=input())
+# current_status = None
+# while current_status == Status.PAUSED or current_status == None:
+#     while len(actions) > 0:
+#         print(actions.pop(0))
+#         their_code, current_status = parse(their_code, user_selection=input() if not current_status == None else None)
 
-while len(actions) > 0:
-    print(actions.pop(0))
+# while len(actions) > 0:
+#     print(actions.pop(0))
 
 
 # print_actions()
@@ -583,11 +865,55 @@ while len(actions) > 0:
 
 
 
+def flatten_text(*text):
+    content : str = ""
+    for i in range(len(text)):
+        if i != 0:
+            content += " "
+        content += str(text[i])
+    return content
+
+def print_character(*text, mood : str = None):
+    DEBUG = False
+    parts = list(text)
+    if len(parts) < 1:
+        parts.append("")
+    dictionary = {"character_speaks" : flatten_text(*text)}
+    if mood:
+        dictionary["character_portrait_changes"] = mood
+        if DEBUG: print("mood changed")
+    actions.append(dictionary)
+    if DEBUG: print("action added")
+
+def print_player(*text):
+    DEBUG = False
+    if len(actions) == 0: actions.append({})
+    if "user_options" in actions[len(actions)-1].keys():
+        actions[len(actions)-1]["user_options"] += [flatten_text(*text)]
+    else:
+        actions[len(actions)-1]["user_options"] = [flatten_text(*text)]
+    if DEBUG: print("option added")
 
 
 
 
 
+
+
+
+
+
+their_code = Code(get_their_code())
+status = their_code.run_to_pause_or_end()
+while status == Status.PAUSED:
+    print_actions()
+    status = their_code.run_to_pause_or_end(input())
+print_actions()
+print(status)
+# segment = CodeSegment(['print_character("Hi player", mood="Happy")', 'print_character("Going well?")', 'print_player("HI")', 'print_player("How\'s it going")', 'print_player("go away")', "input()"])
+# parse_to_pause_or_end(segment)
+# print_actions()
+# print(segment.lines[segment.position])
 
 
 
