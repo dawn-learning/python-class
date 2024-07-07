@@ -1,93 +1,31 @@
-# from tkinter import *
-# import time
+from PIL import ImageTk, Image
+import urllib.request
+from enum import Enum
+import tkinter as tk
+import time
+import io
 
+global character_mood
+character_mood = "normal"
 
-# their_code = []
-# with open("test.py", "r") as f:
-#     line = f.readline()
-#     while line:
-#         their_code.append(line)
-#         line = f.readline()
-# # with open("test.py", "a") as f:
-# #     f.write("def say_hi():\n   print('hi')")
+actions : list[dict]= []
+variables = {}
 
-# while ("\n" in their_code):
-#     their_code.remove("\n")
-
-# remove = []
-# for a in their_code:
-#     if a.strip()[0] == "#":
-#         remove.append(a)
-
-# while (len(remove) > 0):
-#     their_code.remove(remove[0])
-#     remove.remove(remove[0])
-
-# print(their_code)
-
-
-variables = {
-    "x": "content",
-    "y": "5"
+character_portraits = {
+    "normal" : "https://static.wikia.nocookie.net/slimerancher/images/2/2b/MochiDefault.png/revision/latest/scale-to-width-down/1000?cb=20180317174715", 
+    # "normal" : "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwww.solidbackgrounds.com%2Fimages%2F2560x1440%2F2560x1440-blue-solid-color-background.jpg&f=1&nofb=1&ipt=d0b034ef2889b452d604bebc5d1421b6f921356bd47650a96bb69c33436164d5&ipo=images",
+    "icon" : "https://external-content.duckduckgo.com/iu/?u=http%3A%2F%2Fvignette3.wikia.nocookie.net%2Fslimerancher%2Fimages%2F8%2F80%2FMochi_update.png%2Frevision%2Flatest%2Fscale-to-width-down%2F350%3Fcb%3D20160420041618&f=1&nofb=1&ipt=32f4792edf02a1309221f888c328fcbab975cb48c475284fb8a3d985201e871a&ipo=images",
+    "angry" : "https://static.wikia.nocookie.net/slimerancher/images/d/d6/MochiAngry.png/revision/latest/scale-to-width-down/1000?cb=20180317174315", 
+    "boastful" : "https://static.wikia.nocookie.net/slimerancher/images/9/9e/MochiBoastful.png/revision/latest/scale-to-width-down/1000?cb=20180317174331", 
+    "charming" : "https://static.wikia.nocookie.net/slimerancher/images/1/15/MochiCharming.png/revision/latest/scale-to-width-down/1000?cb=20180317174352", 
+    "confident" : "https://static.wikia.nocookie.net/slimerancher/images/8/8a/MochiConfident.png/revision/latest/scale-to-width-down/1000?cb=20180317174404", 
+    "discouraged" : "https://static.wikia.nocookie.net/slimerancher/images/7/74/MochiDiscouraged.png/revision/latest/scale-to-width-down/1000?cb=20180317174418", 
+    "very discouraged" : "https://static.wikia.nocookie.net/slimerancher/images/5/5e/MochiDiscouraged2.png/revision/latest/scale-to-width-down/1000?cb=20180317174429", 
+    "mocking" : "https://static.wikia.nocookie.net/slimerancher/images/2/21/MochiMocking.png/revision/latest/scale-to-width-down/1000?cb=20180317174440", 
+    "sad" : "https://static.wikia.nocookie.net/slimerancher/images/1/13/MochiSad1.png/revision/latest/scale-to-width-down/1000?cb=20180317174500", 
+    "sad mad" : "https://static.wikia.nocookie.net/slimerancher/images/0/0b/MochiSad2.png/revision/latest/scale-to-width-down/1000?cb=20180317174518", 
+    "shy" : "https://static.wikia.nocookie.net/slimerancher/images/4/4c/MochiShy.png/revision/latest/scale-to-width-down/1000?cb=20180317174545", 
 }
-
-# t = 'if (x == "hi"):'
-# if (t.startswith("if")):
-#     t = t.replace(" ", "").rstrip(":").lstrip("if")
-#     if (t.startswith("(") and t.endswith(")")):
-#         t = t.lstrip(f"(").rstrip(")")
-#     left = t.split("==")[0]
-#     right = t.split("==")[1]
-#     for variable in variables.keys():
-#         if (variable in left):
-#             left = left.replace(variable, variables[variable])
-#         if (variable in right):
-#             right = right.replace(variable, variables[variable])
-# print(left, right)
-
-
-
-
-
-
-# t = 'if (((a == "hi"))):'
-# def seporate_equal_sides(t):
-#     a, b = t.split("==")
-
-#     a = a.removeprefix("if").strip()
-#     b = b.removesuffix(":").strip()
-
-#     while (a.count("(") > a.count(")")) and a.startswith("("):
-#         a = a.removeprefix("(")
-
-#     while (b.count("(") < b.count(")")) and b.endswith(")"):
-#         b = b.removesuffix(")")
-#     return a, b
-
-
-
-# # print(seporate_equal_sides(t))
-
-
-operators = ["+", "-", "*", "/", "%", "**", "//", "=", "==", "!=", "(", ")"]
-
-# content = "a    (x+b)"
-# for a in operators:
-#     if a in content:
-#         content = content.replace(a, f" {a} ")
-# content = content.split(" ")
-
-
-# while "" in content:
-#     content.remove("")
-
-# for variable in variables.keys():
-#     while(variable in content):
-#         content[content.index(variable)] = variables[variable]
-
-# print(content)
-
-
 
 def split(text):
     array = [text]
@@ -113,15 +51,6 @@ def split(text):
         array_spot += 1
         # print(array)
     return array
-
-# print(split("(2 * (b == a)"))
-
-
-def recurive_parse(array, depth = 0):
-    if (array[0] == "("):
-        depth += 1
-        array = recurive_parse(array[1:], depth)
-
 
 def squish_array(array : list, DEBUG = False):
     if DEBUG: print("\narray is", array)
@@ -171,7 +100,6 @@ def squish_array(array : list, DEBUG = False):
     if DEBUG: print(f"returning array: {array}\n")
     return array
 
-
 def check_operator(array, operator):
     if operator in array:
         index = array.index(operator)
@@ -203,7 +131,6 @@ def check_operator(array, operator):
         return array, True
     return array, False
 
-
 def predict_and_convert_to_true_type(unknown : str):
     if type(unknown) != str:
         return unknown
@@ -227,149 +154,364 @@ def predict_and_convert_to_true_type(unknown : str):
             return variables[variable]
     return unknown
 
-# statement = "if ((5 / 2) + y * (5/2)) * 0 == 0:"
-# statement = "if (y /= 5):"
-
-# If statement is true, do all indented statements under it and delete all else statments at same level.
-# If statement is false, skip to next not indented statement.
-
-
-
-
-
-import urllib.request
-import tkinter as tk
-from PIL import ImageTk, Image
-import time
-import io
-
-
-character_portraits = {
-    "normal" : "https://static.wikia.nocookie.net/slimerancher/images/2/2b/MochiDefault.png/revision/latest/scale-to-width-down/1000?cb=20180317174715", 
-    "angry" : "https://static.wikia.nocookie.net/slimerancher/images/d/d6/MochiAngry.png/revision/latest/scale-to-width-down/1000?cb=20180317174315", 
-    "boastful" : "https://static.wikia.nocookie.net/slimerancher/images/9/9e/MochiBoastful.png/revision/latest/scale-to-width-down/1000?cb=20180317174331", 
-    "charming" : "https://static.wikia.nocookie.net/slimerancher/images/1/15/MochiCharming.png/revision/latest/scale-to-width-down/1000?cb=20180317174352", 
-    "confident" : "https://static.wikia.nocookie.net/slimerancher/images/8/8a/MochiConfident.png/revision/latest/scale-to-width-down/1000?cb=20180317174404", 
-    "discouraged" : "https://static.wikia.nocookie.net/slimerancher/images/7/74/MochiDiscouraged.png/revision/latest/scale-to-width-down/1000?cb=20180317174418", 
-    "very discouraged" : "https://static.wikia.nocookie.net/slimerancher/images/5/5e/MochiDiscouraged2.png/revision/latest/scale-to-width-down/1000?cb=20180317174429", 
-    "mocking" : "https://static.wikia.nocookie.net/slimerancher/images/2/21/MochiMocking.png/revision/latest/scale-to-width-down/1000?cb=20180317174440", 
-    "sad" : "https://static.wikia.nocookie.net/slimerancher/images/1/13/MochiSad1.png/revision/latest/scale-to-width-down/1000?cb=20180317174500", 
-    "sad mad" : "https://static.wikia.nocookie.net/slimerancher/images/0/0b/MochiSad2.png/revision/latest/scale-to-width-down/1000?cb=20180317174518", 
-    "shy" : "https://static.wikia.nocookie.net/slimerancher/images/4/4c/MochiShy.png/revision/latest/scale-to-width-down/1000?cb=20180317174545", 
-}
-
-def load_portrait(mood):
-    url = character_portraits[mood]
-    with urllib.request.urlopen(url) as u:
-        raw_data = u.read()
-    image = ImageTk.PhotoImage(Image.open(io.BytesIO(raw_data)).resize((350, 350)))
-    return image
-
 def get_portrait_options():
     return list(character_portraits.keys())
 
+class Photo():
+    def __init__(self, file : str | None = None) -> None:
+        if file:
+            self.load_image(file)
+        else:
+            self.image = None
+            self.width = None
+            self.height = None
 
+    def load_portrait(self, mood : str):
+        url = character_portraits[mood]
+        with urllib.request.urlopen(url) as u:
+            raw_data = u.read()
+        # image = ImageTk.PhotoImage(Image.open().resize((350, 350)))
+        # return image
+        self.load_image(io.BytesIO(raw_data))
 
-global character_mood
-character_mood = "normal"
+    def load_image(self, file : any, inital_resize_factor : tuple[float, float] = None):
+        self._just_loaded_image = Image.open(file)
+        if inital_resize_factor:
+            w = int(self._just_loaded_image.width * inital_resize_factor[0])
+            h = int(self._just_loaded_image.height * inital_resize_factor[1])
+            self._just_loaded_image = self._just_loaded_image.resize((w, h))
+        self._unchanged_image = self._just_loaded_image.copy()
+        self.image = ImageTk.PhotoImage(self._just_loaded_image)
+        self._initial_height = self.image.height()
+        self._initial_width = self.image.width()
+        self._update_height_and_width()
 
-actions : list[dict]= [
-    # {
-    #     "character_speaks" : "their sentence. their 2nd sentence. their 2nd sentence again. their 2nd sentence again. their 2nd sentence again. their 2nd sentence again.",
-    #     "character_portrait_changes" : "angry",
-    # }, 
-    # {
-    #     "character_speaks" : "their new sentence",
-    # }, 
-    # {
-    #     "user_options" : ["stuff", "things", "3"]
-    # }
-]
+    def update(self, given_width : int, given_height : int):
+        given_space_width = given_width * 1.0
+        given_space_height = given_height * 1.0
+        if self._initial_width > self._initial_height:
+            new_height = given_space_width/self._initial_width * self._initial_height
+            new_width = given_space_width * 1.0
+        else:
+            new_width = given_space_height/self._initial_height * self._initial_width
+            new_height = given_space_height * 1.0
+        if new_width > given_width:
+            new_height = given_width/self._initial_width * self._initial_height
+            new_width = given_width
+        elif new_height > given_height:
+            new_width = given_width/self._initial_width * self._initial_height
+            new_height = given_height
+        new_width = int(new_width)
+        new_height = int(new_height)
+        self.image = ImageTk.PhotoImage(self._unchanged_image.resize((new_width, new_height)))
+        self._update_height_and_width()
 
+    def force_resize(self, given_width : int, given_height : int):
+        self.image = ImageTk.PhotoImage(self._unchanged_image.resize((int(given_width), int(given_height))))
+        self._update_height_and_width()
+
+    def _update_height_and_width(self):
+        self.height = self.image.height()
+        self.width = self.image.width()
+
+class Dimentions():
+    def __init__(self, width : int = 0, height : int = 0) -> None:
+        self.width = width
+        self.height = height
+
+    def generate_from_event(event):
+        return Dimentions(event.width, event.height)
+    
+    def __eq__(self, value: object) -> bool:
+        E = Exception("A Dimensions object can only be compared to another Dimensions object, a tuple of two numbers, or a list of two numbers")
+        if value == None: return False
+        if type(value) == Dimentions:
+            return (self.width == value.width and self.height == value.height)
+        if type(value) == list or type(value) == tuple:
+            if len(list) != 2:
+                raise E
+            return (self.width == value[0] and self.height == value[1])
+        raise E
+
+def split_text(text : str) -> list[str]:
+    leng = 34
+    if len(text) <= leng:
+        return [text]
+    hard_split = text[:leng]
+    if "\n" in hard_split:
+        spot = text.index("\n") + 1
+        while (text[spot] == " "):
+            spot += 1
+        return [text[:spot]] + split_text(text[spot:])
+    split_point = leng
+    while (text[split_point] != " " and text[split_point] != "\t"):
+        if split_point == 0:
+            split_point = leng
+            break
+        split_point -= 1
+    return [text[:split_point]] + split_text(text[split_point+1:])
+
+def squish_text_array(text_array : list[str]) -> str:
+    output = ""
+    for a in text_array:
+        if not a.endswith("\n"):
+            output += "\n"
+        output += a
+    return output[1:]
+
+class Textbox():
+    def __init__(self, imagename : str) -> None:
+        self.text = None
+        self.background_image = Photo(imagename)
+    
+    def add_to_canvas(
+            self, available_size : Dimentions, canvas : tk.Canvas, center_screen_offset : Dimentions, 
+            function, shrink_factor : int = 1 , count : int = 0,
+        ):
+        self.background_image.force_resize(available_size.width * 4/5, available_size.width / (4 * shrink_factor))
+        background_x = (available_size.width-self.background_image.width)/2
+        background_y = available_size.height-self.background_image.height * (count+1) - (self.background_image.height / 25) * count
+        self.background_object = canvas.create_image(
+            center_screen_offset.width + background_x, 
+            center_screen_offset.height + background_y, 
+            image = self.background_image.image, anchor=tk.NW)
+        canvas.tag_bind(self.background_object, '<Button-1>', lambda _: function())
+        self.text = canvas.create_text(
+            center_screen_offset.width + background_x * 1.35,
+            center_screen_offset.height + (background_y * 1.03 if shrink_factor == 1 else background_y * 1.01),
+            justify="left",
+            anchor=tk.NW,
+            font=('Times New Roman', int(available_size.width * 3 /100), 'normal'),
+            text=squish_text_array(split_text("AHHHHH")))
+
+    def show(self, canvas : tk.Canvas):
+        self._change_visibility(canvas, visibility=True)
+
+    def hide(self, canvas : tk.Canvas):
+        self._change_visibility(canvas, visibility=False)
+
+    def _change_visibility(self, canvas : tk.Canvas, visibility : bool):
+        canvas.itemconfigure(self.background_object, state='normal' if visibility else 'hidden')
+        canvas.itemconfigure(self.text, state='normal' if visibility else 'hidden')
+
+    def update_text(self, canvas : tk.Canvas, text : str):
+        canvas.itemconfigure(self.text, text = text)
 
 class Window(tk.Tk):
     def __init__(self, code) -> None:
         tk.Tk.__init__(self)
+        # self.geometry("400x400")
 
         self.code = code
 
         # Used to allow the user to interupt typing out the character's text
         self.type_called_count = 0
 
-        self.image_height = 3
+        # self.image_height_rows = 3
+        self.previous_event = None
 
-        self.image = load_portrait(character_mood)
-        self.portrait = tk.Label(self, image=self.image)
-        self.portrait.grid(row=0, column=0, rowspan=self.image_height, columnspan=2)
+        # self.photo = Photo()
+        # self.photo.load_portrait(character_mood)
+        # self.portrait = tk.Label(self, image=self.photo.image)
+        # self.portrait.grid(row=0, column=1, sticky="nsew", rowspan=self.image_height_rows)
+        # # , columnspan=2
 
-        self.displayed_text = tk.Label(self, text="", justify="left", wraplength=200) # wraplength is in pixels not characters
-        self.displayed_text.grid(row=0, column=1)
+        self.bind("<Configure>", self._resize_widgets)
 
-        self.create_player_dialogue_frame()
+        # # for i in range(4):
+        # # self.columnconfigure(0, weight=1)
+        # # self.rowconfigure(0, weight=1)
+        #     # self.columnconfigure(i, weight=1)
+        #     # self.rowconfigure(i, weight=1)
 
-        button_frame = tk.Frame(self, width=100, height=100, bg="#621947")
-        button_frame.grid(row=self.image_height + 1, column=0, columnspan=2)
-        tk.Button(button_frame, text = 'Run', command = lambda : self.Type("text")).grid(row=0, column=0)
-        tk.Button(button_frame, text = '>>', command = lambda : self.next()).grid(row=0, column=2)
+        # # self.displayed_text = tk.Label(self, text="",justify="right", wraplength=200, bg="lightgray", fg="purple", padx=10, pady=10, borderwidth=5, relief="solid") # wraplength is in pixels not characters
+        # # self.displayed_text.grid(row=0, column=1, sticky="w", padx=20)
 
-    def create_player_dialogue_frame(self, dialogue_options : list[str] = []):
-        self.player_dialogue_frame = tk.Frame(self, height=100, bg="#621947")
-        self.player_dialogue_frame.grid(row=self.image_height-1, column=0, columnspan=2)
-        for i in range(len(dialogue_options)):
-            label = tk.Button(self.player_dialogue_frame, text=dialogue_options[i], command= lambda i = i : self.dialogue_option_pressed(i))
-            label.pack()
+        # # self.create_player_dialogue_frame()
+        # # label = tk.Label(self, text="Hello, Tkinter!                                                            ", bg="lightgray", fg="purple", padx=10, pady=10, borderwidth=5, relief="solid")
+        # # label.grid(row=0, column=1)
+
+        # # button_frame = tk.Frame(self, width=100, height=100, bg="#621947")
+        # # button_frame.grid(row=self.image_height_rows + 1, column=0, columnspan=2)
+        # # tk.Button(self, text = 'Run', command = lambda : self.Type("text")).grid(row=0, column=1)
+
+
+        # # self.text_background = Photo()
+        # # self.text_background.load_image("Picture1.png", (0.1, 0.1))
+        # # tk.Label(self, image=self.text_background.image).grid(row=self.image_height_rows-1, column=1)
+        # self.displayed_text = tk.Label(
+        #     self, 
+        #     text="jkflejlajfelkaljkfjdlkal", 
+        #     justify="right", 
+        #     wraplength=200, 
+        #     bg="lightgray", 
+        #     fg="purple", 
+        #     # width=25,
+        #     height=5,
+        #     # padx=10, 
+        #     # pady=5, 
+        #     borderwidth=5, 
+        #     relief="solid",
+        #     font=('Times New Roman', 15, 'bold'),
+        # )
+        # self.displayed_text.grid(row=self.image_height_rows-1, column=1, sticky="s") # wraplength is in pixels not characters
+        # self.spacer = tk.Label(width=0)
+        # self.spacer.grid(row=0, column=0)
+        # tk.Button(self, text = '>>', command = lambda : self.next()).grid(row=self.image_height_rows-1, column=1, sticky="se")
+
+        self.screen_dimentions = Dimentions(500, 500)
+        self.geometry(f'{self.screen_dimentions.width}x{self.screen_dimentions.height}')
+
+
+        self.portrait = Photo()
+        self.portrait.load_portrait("normal")
+        self.canvas = tk.Canvas(self, background="red")
+        self.canvas.pack(fill=tk.BOTH, expand=True)
+        self.available_size : Dimentions = None
+        self.canvas_textbox : Textbox = Textbox("Picture1.png")
+        self.canvas_user_options_textboxes : list[Textbox] = []
+        self.inital_text = self.canvas.create_text(
+                self.winfo_width()/2,
+                self.winfo_height()/2,
+                text="INTERVIEW GAME",
+                font=('Times New Roman', int(self.winfo_width() * 3/100), 'bold'),
+        )
+        self.dont_change_size = True
+        self.canvas.tag_bind(self.inital_text, '<Button-1>', lambda _: self.next())
+        # self.fill_canvas()
+        
+
+    def fill_canvas(self):
+        self.canvas.delete("all")
+        self.portrait.update(self.screen_dimentions.width, self.screen_dimentions.height)
+        self.available_size = Dimentions(self.portrait.width, self.portrait.height)
+        new_offset = Dimentions(int((self.screen_dimentions.width-self.available_size.width)/2), int((self.screen_dimentions.height-self.available_size.height)/2))
+        self.center_screen_offset = new_offset
+
+        self.portrait_spot = self.canvas.create_image(
+            self.center_screen_offset.width + (self.available_size.width - self.portrait.width)/2, 
+            self.center_screen_offset.height + (self.available_size.height - self.portrait.height)/2, 
+            image = self.portrait.image, anchor=tk.NW)
+
+        self._create_canvas()
+
+    def _create_canvas(self, small_count : int | None = None):
+        # self.canvas_objects = []
+        if not small_count:
+            self.canvas_textbox.add_to_canvas(self.available_size, self.canvas, self.center_screen_offset, self.next)
+            return
+        if small_count < 1:
+            raise Exception("Must have at least one user option")
+        self.canvas_user_options_textboxes = []
+        for i in range(small_count):
+            print(i)
+            if i >= len(self.canvas_user_options_textboxes):
+                print("adding textbox")
+                self.canvas_user_options_textboxes.append(Textbox("Picture1Small.png"))
+            print("adding to canvas")
+            self.canvas_user_options_textboxes[i].add_to_canvas(self.available_size, self.canvas, self.center_screen_offset, lambda i = i: self.dialogue_option_pressed(i), shrink_factor= 4, count=i)
+
+    def _resize_widgets(self, event):
+        if self.dont_change_size:
+            return
+        width = self.winfo_width()
+        height = self.winfo_height()
+        if not self.previous_event == None and self.previous_event[0] == width and self.previous_event[1] == height:
+            return
+        print(event)
+        self.previous_event = (width, height)
+        # # if not self.previous == (width, height):
+        #     # self.previous = (width, height)
+        # self.photo.update(width * 10/10, height * 10/10)
+        # self.portrait.configure(image=self.photo.image)
+        # self.displayed_text.configure(
+        #     width=int(self.winfo_width()/15), 
+        #     height=int(self.winfo_height()/100), 
+        #     font=('Times New Roman', int(self.winfo_width()/50), 'bold'), 
+        # )
+        # self.spacer.configure(width=int((self.winfo_width() - self.portrait.winfo_width())/20))
+        self.screen_dimentions = Dimentions(width, height)
+        self.fill_canvas()
 
     def Type(self, text="text"):
         self.type_called_count +=1
         my_type_called_count = self.type_called_count
         # Clear previous text
-        self.displayed_text["text"] = ""
+        # self.displayed_text["text"] = ""
+        self.canvas.itemconfigure(self.canvas_textbox.text, text="")
         self.update()
         # Type out new text one character at a time.
         for i in range(len(text)+1):
             if my_type_called_count != self.type_called_count: return
-            self.displayed_text["text"] = text[0: i]
+            # self.displayed_text["text"] = text[0: i]
+            self.canvas.itemconfigure(self.canvas_textbox.text, text=text[0: i])
             self.update()
             time.sleep(0.05)
 
     def dialogue_option_pressed(self, i):
         if len(actions) == 0:
             # prep for next
-            i += 1
-            status = their_code.run_to_pause_or_end(str(i))
+            status = self.code.run_to_pause_or_end(str(i+1))
             if status == Status.COMPLETED:
-                actions.append({"Note": "Game Over."})
+                actions.append({"note": "Game Over."})
         self.next()
 
-    def next(self):
-        if len(actions) == 0: return
+    def next(self, user_action = None):
+        if not self.available_size:
+            self.fill_canvas()
+            self.dont_change_size = False
+        if len(actions) == 0: 
+            if user_action == None: return
+            parse(self.code, user_selection=user_action)
+            print(actions)
+            if len(actions) == 0: return
         current_actions : dict = actions.pop(0)
+        print(current_actions)
         if (current_actions == None): return
         keys = current_actions.keys()
         if "character_portrait_changes" in keys:
             character_mood = current_actions["character_portrait_changes"]
-            image = load_portrait(character_mood)
-            self.portrait.configure(image=image)
-            self.portrait.image = image
-        if "character_speaks" in keys:
-            self.Type(current_actions["character_speaks"])
+            temp = (self.portrait.image.width(), self.portrait.image.height())
+            self.portrait.load_portrait(character_mood)
+            self.portrait.update(temp[0], temp[1])
+            # self.portrait.configure(image=self.photo.image)
+            # self.portrait.image = self.photo.image
+            self.canvas.itemconfigure(self.portrait_spot, image = self.portrait.image)
         if "user_options" in keys:
-            self.create_player_dialogue_frame(current_actions["user_options"])
-
-
-
-
+            user_options = current_actions["user_options"]
+            if len(user_options) > len(self.canvas_user_options_textboxes):
+                self._create_canvas(small_count=len(user_options))
+            for i in range(len(self.canvas_user_options_textboxes)):
+                if i < len(user_options):
+                    self.canvas_user_options_textboxes[i].show(canvas=self.canvas)
+                    self.canvas_user_options_textboxes[i].update_text(canvas=self.canvas, text=user_options[i])
+                else:
+                    self.canvas_user_options_textboxes[i].hide(canvas=self.canvas)
+            # self.create_player_dialogue_frame(current_actions["user_options"])
+        else:
+            for a in self.canvas_user_options_textboxes:
+                a.hide(canvas=self.canvas)
+        if "character_speaks" in keys:
+            self.canvas_textbox.show(canvas=self.canvas)
+            self.Type(current_actions["character_speaks"])
+        else:
+            self.canvas_textbox.hide(canvas=self.canvas)
+        if "note" in keys:
+            self.canvas.delete("all")
+            self.canvas.create_text(
+                self.winfo_width()/2,
+                self.winfo_height()/2,
+                text=current_actions["note"],
+                font=('Times New Roman', int(self.winfo_width() * 3/100), 'normal'),
+            )
 
 def parse_function(line, function_name):
     line : str = line.strip().removeprefix(function_name).removesuffix(")").strip().removeprefix("(")
     return [a.strip() for a in line.split(",")]
 
-
-
-
-def get_their_code():
+def get_their_code(filename : str = "test.py"):
     their_code = []
-    with open("test.py", "r") as f:
+    with open(filename, "r") as f:
         while True:
             line = f.readline()
             if not line: break
@@ -384,23 +526,10 @@ def get_their_code():
             their_code.append(line[:-1])
     return their_code
 
-
-# to_parse = [their_code]
-# to_parse_location = 0
-# parsed = []
-# lines = to_parse[to_parse_location]
-# for line in lines:
-#     if "if" in lines:
-#         print("found")
-
-
-from enum import Enum
-
 class Status(Enum):
     COMPLETED = 0
     PAUSED = 1
     CONTINUING = 2
-
 
 class Code():
     def __init__(self, code : str, DEBUG : bool = False) -> None:
@@ -494,8 +623,6 @@ class Code():
             self.next()
         return Status.COMPLETED
 
-
-
 class CodeSegment():
     def __init__(self, lines : list[str], position : int = 0, repeat = False, DEBUG : bool = False) -> None:
         self.lines = lines
@@ -566,7 +693,7 @@ class CodeSegment():
         """
         - returns None if not an if statement
         - returns the True/False falue of the statement if is an if statement
-        Note: if, elif, and else statements all count as a type of if statement for this function's purposes
+        note: if, elif, and else statements all count as a type of if statement for this function's purposes
         """
         def turn_line_into_True_or_False(line : str) -> bool:
             if not line.endswith(":"):
@@ -653,7 +780,6 @@ class CodeSegment():
     def other_line_type(self):
         DEBUG = True
         self.lines[self.position] = squish_array(split(self.get_line()), DEBUG=DEBUG)[0]
-
 
 def print_line(lines, position):
     return lines[position] if position < len(lines) else "EOF"
@@ -800,7 +926,6 @@ def parse(their_code : list, user_selection = None, DEBUG = False) -> tuple[list
         their_code[len(their_code)-1][1] = line_i
     return their_code, Status.COMPLETED
 
-
 def print_actions():
     # print()
 
@@ -811,31 +936,6 @@ def print_actions():
 
     for a in actions:
         print(a)
-
-
-
-
-
-
-
-
-# their_code = [[get_their_code(), 0]]
-
-# current_status = None
-# while current_status == Status.PAUSED or current_status == None:
-#     while len(actions) > 0:
-#         print(actions.pop(0))
-#         their_code, current_status = parse(their_code, user_selection=input() if not current_status == None else None)
-
-# while len(actions) > 0:
-#     print(actions.pop(0))
-
-
-# print_actions()
-# for a in their_code:
-#     print(f"length = {len(a[0])}, i = {a[1]}")
-
-
 
 def flatten_text(*text):
     content : str = ""
@@ -863,59 +963,12 @@ def print_player(*text):
     if "user_options" in actions[len(actions)-1].keys():
         actions[len(actions)-1]["user_options"] += [flatten_text(*text)]
     else:
-        actions[len(actions)-1]["user_options"] = [flatten_text(*text)]
+        # actions[len(actions)-1]["user_options"] = [flatten_text(*text)]
+        actions.append({"user_options" : [flatten_text(*text)]})
     if DEBUG: print("option added")
 
-
-
-
-
-
-their_code = Code(get_their_code())
-status = their_code.run_to_pause_or_end()
-Window(their_code)
-tk.mainloop()
-
-
-
-
-
-
-
-
-# segment = CodeSegment(['print_character("Hi player", mood="Happy")', 'print_character("Going well?")', 'print_player("HI")', 'print_player("How\'s it going")', 'print_player("go away")', "input()"])
-# parse_to_pause_or_end(segment)
-# print_actions()
-# print(segment.lines[segment.position])
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# ---- test saved data on phone (emoji, podcasts)
-
-
-
-
-
-
-
-
-
-
-
-
-
+if __name__ == "__main__":
+    their_code = Code(get_their_code())
+    status = their_code.run_to_pause_or_end()
+    Window(their_code)
+    tk.mainloop()
