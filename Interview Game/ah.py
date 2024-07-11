@@ -1,15 +1,14 @@
+from __future__ import annotations
 from PIL import ImageTk, Image
 import urllib.request
-from enum import Enum
 import tkinter as tk
 import time
 import io
+from enum import Enum
+from code import load_code, Status
 
 global character_mood
 character_mood = "normal"
-
-actions : list[dict]= []
-variables = {}
 
 character_portraits = {
     "normal" : "https://static.wikia.nocookie.net/slimerancher/images/2/2b/MochiDefault.png/revision/latest/scale-to-width-down/1000?cb=20180317174715", 
@@ -26,133 +25,6 @@ character_portraits = {
     "sad mad" : "https://static.wikia.nocookie.net/slimerancher/images/0/0b/MochiSad2.png/revision/latest/scale-to-width-down/1000?cb=20180317174518", 
     "shy" : "https://static.wikia.nocookie.net/slimerancher/images/4/4c/MochiShy.png/revision/latest/scale-to-width-down/1000?cb=20180317174545", 
 }
-
-def split(text):
-    array = [text]
-    array_spot = 0
-    while (array_spot < len(array)):
-        to_deal_with = array.pop(array_spot).strip()
-        for text_spot in range(len(to_deal_with)):
-            found = False
-            for a in ["==", "+=", "-=", "*=", "/=", "(", ")", "*", "=", "+", "/", "or", "and"]:
-                if (to_deal_with[text_spot : text_spot + len(a)] == a):
-                    before = to_deal_with[0: text_spot]
-                    if len(before) > 0:
-                        array.append(before)
-                        array_spot +=1 
-                    array.append(to_deal_with[text_spot : text_spot + len(a)])
-                    to_deal_with = to_deal_with[text_spot + len(a) :]
-                    found = True
-                    break
-            if found:
-                break
-        if len(to_deal_with) > 0:
-            array.append(to_deal_with)
-        array_spot += 1
-        # print(array)
-    return array
-
-def squish_array(array : list, DEBUG = False):
-    if DEBUG: print("\narray is", array)
-    for double_operator in ["+=", "-=", "*=", "/="]:
-        while (double_operator in array):
-            spot = array.index(double_operator)
-            array[spot] = double_operator[1]
-            array.insert(spot+1, double_operator[0])
-            array.insert(spot+1, array[spot-1])
-    if DEBUG: print("- double operators", array)
-    while ("(" in array):
-        parenthesis = []
-        parenthesis_added = False
-        if DEBUG: print("checking array:", array)
-        for i in range(len(array)):
-            if array[i] == "(":
-                parenthesis.append(")")
-                if str(parenthesis_added) == "False":
-                    parenthesis_added = i
-                if DEBUG: print(f"open parenthesis index = {i}")
-            elif array[i] == ")":
-                parenthesis.pop()
-                if DEBUG: print(f"close parenthesis index = {i}")
-            if str(parenthesis_added) != "False" and (len(parenthesis) == 0):
-                if DEBUG: print("Detected largest internal array:", array[parenthesis_added+1 : i])
-                result = squish_array(array[parenthesis_added+1 : i], DEBUG=DEBUG)
-                array = array[: parenthesis_added] + result + array[i+1:]
-                break
-                # for _ in range(i - parenthesis_added + 1):
-                #     array.pop(parenthesis_added)
-                # array.insert(parenthesis_added, result[0])
-    # return
-    if DEBUG: print("array (-parenthesis) is", array)
-    while len(array) > 1:
-        # Error checking
-        if (len(array) == 2):
-            array == [str(array[0]) + str(array[1])]
-            break
-        # Order of operations
-        for operator in ["*", "/", "+", "-", "and", "or", "==", "="]:
-            array, worked = check_operator(array, operator)
-            if (worked):
-                if DEBUG: print("Doing", operator)
-                if DEBUG and len(array) > 1: print(array)
-                break
-    if len(array) == 0: array = [None]
-    if DEBUG: print(f"returning array: {array}\n")
-    return array
-
-def check_operator(array, operator):
-    if operator in array:
-        index = array.index(operator)
-        left : list = array[index-1]
-        if type(left) == str:
-            left = left.strip()
-        if not operator == "=":
-            left = predict_and_convert_to_true_type(left)
-        right : list = predict_and_convert_to_true_type(array[index+1])
-        if operator == "*":
-            array = array[: index-1] + [left * right] + array[index + 2:]
-        elif operator == "/":
-            array = array[: index-1] + [left / right] + array[index + 2:]
-        elif operator == "+":
-            array = array[: index-1] + [left + right] + array[index + 2:]
-        elif operator == "-":
-            array = array[: index-1] + [left - right] + array[index + 2:]
-        elif operator == "and":
-            array = array[: index-1] + [left and right] + array[index + 2:]
-        elif operator == "or":
-            array = array[: index-1] + [left or right] + array[index + 2:]
-        elif operator == "==":
-            # print(f"left {left} of type {type(left)} is being compared to right {right} of type {type(right)}")
-            array = array[: index-1] + [left == right] + array[index + 2:]
-        elif operator == "=":
-            print(f"variable {left} is being set to {right} or type {type(right)}")
-            variables[left] = right
-            array = array[: index-1] + array[index + 2:]
-        return array, True
-    return array, False
-
-def predict_and_convert_to_true_type(unknown : str):
-    if type(unknown) != str:
-        return unknown
-    unknown = unknown.strip()
-    if (unknown.startswith("'") and unknown.endswith("'")) or (unknown.startswith('"') and unknown.endswith('"')):
-        return str(unknown[1 : -1])
-    if "." in unknown:
-        try:
-            return float(unknown)
-        except:
-            pass
-    try:
-        return int(unknown)
-    except:
-        pass
-    if (unknown == "True"): return True
-    if (unknown == "False"): return False
-    for variable in variables.keys():
-        if unknown == variable:
-            # print(f"Replacing {variable} with {variables[variable]}")
-            return variables[variable]
-    return unknown
 
 def get_portrait_options():
     return list(character_portraits.keys())
@@ -173,6 +45,7 @@ class Photo():
         # image = ImageTk.PhotoImage(Image.open().resize((350, 350)))
         # return image
         self.load_image(io.BytesIO(raw_data))
+        return self
 
     def load_image(self, file : any, inital_resize_factor : tuple[float, float] = None):
         self._just_loaded_image = Image.open(file)
@@ -185,6 +58,7 @@ class Photo():
         self._initial_height = self.image.height()
         self._initial_width = self.image.width()
         self._update_height_and_width()
+        return self
 
     def update(self, given_width : int, given_height : int):
         given_space_width = given_width * 1.0
@@ -219,6 +93,9 @@ class Dimentions():
         self.width = width
         self.height = height
 
+    def __str__(self):
+        return f"<width={self.width}, height={self.height}>"
+
     def generate_from_event(event):
         return Dimentions(event.width, event.height)
     
@@ -228,7 +105,7 @@ class Dimentions():
         if type(value) == Dimentions:
             return (self.width == value.width and self.height == value.height)
         if type(value) == list or type(value) == tuple:
-            if len(list) != 2:
+            if len(value) != 2:
                 raise E
             return (self.width == value[0] and self.height == value[1])
         raise E
@@ -300,86 +177,18 @@ class Textbox():
 class Window(tk.Tk):
     def __init__(self, code) -> None:
         tk.Tk.__init__(self)
-        # self.geometry("400x400")
-
         self.code = code
-
         # Used to allow the user to interupt typing out the character's text
         self.type_called_count = 0
-
-        # self.image_height_rows = 3
         self.previous_event = None
-
-        # self.photo = Photo()
-        # self.photo.load_portrait(character_mood)
-        # self.portrait = tk.Label(self, image=self.photo.image)
-        # self.portrait.grid(row=0, column=1, sticky="nsew", rowspan=self.image_height_rows)
-        # # , columnspan=2
-
-        self.bind("<Configure>", self._resize_widgets)
-
-        # # for i in range(4):
-        # # self.columnconfigure(0, weight=1)
-        # # self.rowconfigure(0, weight=1)
-        #     # self.columnconfigure(i, weight=1)
-        #     # self.rowconfigure(i, weight=1)
-
-        # # self.displayed_text = tk.Label(self, text="",justify="right", wraplength=200, bg="lightgray", fg="purple", padx=10, pady=10, borderwidth=5, relief="solid") # wraplength is in pixels not characters
-        # # self.displayed_text.grid(row=0, column=1, sticky="w", padx=20)
-
-        # # self.create_player_dialogue_frame()
-        # # label = tk.Label(self, text="Hello, Tkinter!                                                            ", bg="lightgray", fg="purple", padx=10, pady=10, borderwidth=5, relief="solid")
-        # # label.grid(row=0, column=1)
-
-        # # button_frame = tk.Frame(self, width=100, height=100, bg="#621947")
-        # # button_frame.grid(row=self.image_height_rows + 1, column=0, columnspan=2)
-        # # tk.Button(self, text = 'Run', command = lambda : self.Type("text")).grid(row=0, column=1)
-
-
-        # # self.text_background = Photo()
-        # # self.text_background.load_image("Picture1.png", (0.1, 0.1))
-        # # tk.Label(self, image=self.text_background.image).grid(row=self.image_height_rows-1, column=1)
-        # self.displayed_text = tk.Label(
-        #     self, 
-        #     text="jkflejlajfelkaljkfjdlkal", 
-        #     justify="right", 
-        #     wraplength=200, 
-        #     bg="lightgray", 
-        #     fg="purple", 
-        #     # width=25,
-        #     height=5,
-        #     # padx=10, 
-        #     # pady=5, 
-        #     borderwidth=5, 
-        #     relief="solid",
-        #     font=('Times New Roman', 15, 'bold'),
-        # )
-        # self.displayed_text.grid(row=self.image_height_rows-1, column=1, sticky="s") # wraplength is in pixels not characters
-        # self.spacer = tk.Label(width=0)
-        # self.spacer.grid(row=0, column=0)
-        # tk.Button(self, text = '>>', command = lambda : self.next()).grid(row=self.image_height_rows-1, column=1, sticky="se")
 
         self.screen_dimentions = Dimentions(500, 500)
         self.geometry(f'{self.screen_dimentions.width}x{self.screen_dimentions.height}')
 
+        self.canvas = BlankPage(self)
 
-        self.portrait = Photo()
-        self.portrait.load_portrait("normal")
-        self.canvas = tk.Canvas(self, background="red")
-        self.canvas.pack(fill=tk.BOTH, expand=True)
-        self.available_size : Dimentions = None
-        self.canvas_textbox : Textbox = Textbox("Picture1.png")
-        self.canvas_user_options_textboxes : list[Textbox] = []
-        self.inital_text = self.canvas.create_text(
-                self.winfo_width()/2,
-                self.winfo_height()/2,
-                text="INTERVIEW GAME",
-                font=('Times New Roman', int(self.winfo_width() * 3/100), 'bold'),
-        )
-        self.dont_change_size = True
-        self.canvas.tag_bind(self.inital_text, '<Button-1>', lambda _: self.next())
-        # self.fill_canvas()
-        
+    def run(self):
+        self.mainloop()
 
     def fill_canvas(self):
         self.canvas.delete("all")
@@ -409,7 +218,7 @@ class Window(tk.Tk):
                 print("adding textbox")
                 self.canvas_user_options_textboxes.append(Textbox("Picture1Small.png"))
             print("adding to canvas")
-            self.canvas_user_options_textboxes[i].add_to_canvas(self.available_size, self.canvas, self.center_screen_offset, lambda i = i: self.dialogue_option_pressed(i), shrink_factor= 4, count=i)
+            self.canvas_user_options_textboxes[i].add_to_canvas(self.available_size, self.canvas, self.center_screen_offset, lambda i = i: self.next(str(i+1)), shrink_factor= 4, count=i)
 
     def _resize_widgets(self, event):
         if self.dont_change_size:
@@ -448,26 +257,15 @@ class Window(tk.Tk):
             self.update()
             time.sleep(0.05)
 
-    def dialogue_option_pressed(self, i):
-        if len(actions) == 0:
-            # prep for next
-            status = self.code.run_to_pause_or_end(str(i+1))
-            if status == Status.COMPLETED:
-                actions.append({"note": "Game Over."})
-        self.next()
-
     def next(self, user_action = None):
         if not self.available_size:
             self.fill_canvas()
             self.dont_change_size = False
-        if len(actions) == 0: 
-            if user_action == None: return
-            parse(self.code, user_selection=user_action)
-            print(actions)
-            if len(actions) == 0: return
-        current_actions : dict = actions.pop(0)
+        current_actions : dict = self.code.next_line(user_input = user_action)
         print(current_actions)
-        if (current_actions == None): return
+        if (current_actions == Status.PAUSED): return
+        if (current_actions == None):
+            current_actions = {"Note" : "Game Over"}
         keys = current_actions.keys()
         if "character_portrait_changes" in keys:
             character_mood = current_actions["character_portrait_changes"]
@@ -505,470 +303,670 @@ class Window(tk.Tk):
                 font=('Times New Roman', int(self.winfo_width() * 3/100), 'normal'),
             )
 
-def parse_function(line, function_name):
-    line : str = line.strip().removeprefix(function_name).removesuffix(")").strip().removeprefix("(")
-    return [a.strip() for a in line.split(",")]
+class Page(tk.Canvas):
+    def __init__(self, parent, widgets : list | None = None) -> None:
+        tk.Canvas.__init__(self)
+        self.parent = parent
 
-def get_their_code(filename : str = "test.py"):
-    their_code = []
-    with open(filename, "r") as f:
-        while True:
-            line = f.readline()
-            if not line: break
-            # Removes lines that are not code
-            if (line == "\n"): continue
-            if line.lstrip().startswith("#"): continue
-            if "#" in line:
-                line = line[:line.index("#")]
-            # Removes import statements
-            if "import" in line and not ( "'" in line or '"' in line): continue
-            # Appends the rest
-            their_code.append(line[:-1])
-    return their_code
+        self.previous_event_space = None
 
-class Status(Enum):
-    COMPLETED = 0
-    PAUSED = 1
-    CONTINUING = 2
+        if widgets: self.widgets = widgets
 
-class Code():
-    def __init__(self, code : str, DEBUG : bool = False) -> None:
-        self.DEBUG = DEBUG
-        self._code : list[CodeSegment] = [CodeSegment(code)]
-        self._update_active()
+        self.parent.bind("<Configure>", self._resize_widgets)
 
-    def _update_active(self) -> None:
-        self._active_code : CodeSegment = self._code[len(self._code)-1]
-        if self.DEBUG: print("New focused line:")
-        if self.DEBUG: print(f" {self._active_code.position}/{len(self._active_code.lines)}")
-        if self.DEBUG: print(f" {self._active_code.lines[self._active_code.position]}")
+        self.configure(background="red")
+        self.pack(fill=tk.BOTH, expand=True)
 
-    def indent(self, indent_code : list[str]) -> None:
-        self._code.append(CodeSegment(indent_code))
-        self._update_active()
+        # These are named without _s so that children classes are less likely to cause a name conflict
+        self.varsofself = None
+        self.allwidgets = []
 
-    def change_DEBUG(self, DEBUG : bool) -> None:
-        self.DEBUG = DEBUG
+    def _get_widgets_that_need_resizing(self):
+        output = []
+        self.varsofself = vars(self)
+        for variable in self.varsofself.values():
+                if (issubclass(type(variable), Widget)):
+                    output.append(variable)
+                if type(variable) == list or type(variable) == tuple or type(variable) == set:
+                    for subvariable in variable:
+                        if (issubclass(type(subvariable), Widget)):
+                            output.append(subvariable)
+        return output
 
-    def next(self) -> Status:
-        self._active_code.next()
-        while self._active_code.completed:
-            if self.pop() == Status.COMPLETED:
-                return Status.COMPLETED
-        return Status.CONTINUING
+    def _resize_widgets(self, event = None, force_refresh : bool = False):
+        def call_resize(variable : Widget):
+            if not variable.resize_status == Resize.NEEDED: return
+            variable.resize()
+            variable.resize_status = Resize.COMPLETE
 
-    def is_if_statement(self):
-        return self._active_code.is_if_statement()
+        def set_resize_needed(variable : Widget):
+            variable.resize_status = Resize.NEEDED
 
-    def pop(self) -> Status:
-        self._code.pop()
-        if self._code == []:
-            return Status.COMPLETED
-        self._update_active()
-        return Status.CONTINUING
+        # Checks if new widgets have been added dynamically
+        if self.varsofself != vars(self):
+            self.allwidgets = self._get_widgets_that_need_resizing()
 
-    def find_next_not_indented(self) -> Status:
-        if self._active_code.find_next_not_indented() == Status.COMPLETED:
-            return self.pop()
-        return Status.CONTINUING
+        # Makes sure only updates the widget's sizes when needed. 
+        #  For SOME REASON, the event sometimes gets fired twice in a row when the window is maximized or de-maximized. If 
+        #  resizing is done on only one of these events, the widgets are not in their proper places. If it is done on both, 
+        #  they are fine. The second event has x and y set to zero when maximize button pressed. The first has x and y set 
+        #  to zero when the window is dragged to or away from the top of the screen as a shortcut for the maximize button.
+        if not force_refresh:
+            if not (event.x == 0 and event.y == 0):
+                # Check to see if same size as before
+                current_space = self.get_size()
+                if self.previous_event_space == current_space:
+                    return
+                self.previous_event_space = current_space
 
-    def run_if_statement(self, boolean : bool):
-        result = self._active_code.run_if_statement(boolean)
-        if result == None: return
-        if not type(result) == CodeSegment:
-            raise Exception(f"Result should be a None or a CodeSegment\n result = {result}")
-        self.indent(result)
+        # Resizes all the widgets
+        for variable in self.allwidgets:
+            set_resize_needed(variable)
+        for variable in self.allwidgets:
+            call_resize(variable)
+
+    def get_size(self):
+        return Dimentions(self.parent.winfo_width(), self.parent.winfo_height())
+
+    def get_position(self):
+        return (0, 0)
+
+class Resize(Enum):
+    COMPLETE = "This object has been resized"
+    IN_PROCESS = "The resize function is being called"
+    NEEDED = "This object needs to be resized"
+    DONT = "This object does not get resized"
+
+class Positioned(Enum):
+    BACKGROUND = "Fills full available space if possible"
+    CENTERED = "Centered"
+    ABOVE = "Directly above given object"
+    RIGHT = "Directly to the right of the given object"
+    LEFT = "Directly to the left of the given object"
+    BELOW = "Directly below given object"
+    INSIDE = "Inside a space with given percent or pixels off upper left corner"
+
+class Alignment(Enum):
+    TOPRIGHT = "top right"
+    TOPLEFT = "top left"
+    BOTTOMRIGHT = "bottom right"
+    BOTTOMLEFT = "bottom left"
+    TOP = "top"
+    RIGHT = "right"
+    LEFT = "left"
+    BOTTOM = "bottom"
+    CENTER = "center"
+
+    def contains(self, alignment) -> bool:
+        if alignment == self: return True
+        if alignment == Alignment.TOP:
+            return self == Alignment.TOPRIGHT or self == Alignment.TOPLEFT
+        if alignment == Alignment.BOTTOM:
+            return self == Alignment.BOTTOMLEFT or self == Alignment.BOTTOMRIGHT
+        if alignment == Alignment.RIGHT:
+            return self == Alignment.TOPRIGHT or self == Alignment.BOTTOMRIGHT
+        if alignment == Alignment.LEFT:
+            return self == Alignment.TOPLEFT or self == Alignment.BOTTOMLEFT
+        if alignment == Alignment.CENTER:
+            return self == Alignment.TOP or self == Alignment.BOTTOM or self == Alignment.RIGHT or self == Alignment.LEFT
 
 
-    def replace_input_with(self, user_input):
-        return self._active_code.replace_input_with(user_input)
+class AllowedSpace(Dimentions):
+    def __init__(self, dimensions : Dimentions = None, width: int = 0, height: int = 0, x : float = 0, y : float = 0) -> None:
+        super().__init__(dimensions.width if dimensions else width, dimensions.height if dimensions else height)
+        self.x : float = x
+        self.y : float = y
 
-    def is_completed(self):
-        return self._code == []
+    def get_size(self):
+        return Dimentions(self.width, self.height)
 
-    def detect_pause(self):
-        return self._active_code.detect_pause()
+    def get_position(self):
+        return (self.x, self.y)
 
-    def run_to_pause_or_end(self, user_input : str = None):
-        def check_functions(segment):
-            for function in [print_character, print_player]:
-                if segment.check_for_and_run_function(function):
-                    return True
+class Side(Enum):
+    TOP = 0
+    BOTTOM = 1
+    LEFT = 2
+    RIGHT = 3
+
+class FontDetails():
+    def __init__(self, font : str = 'Times New Roman', font_size : int = 10, effect : str = "normal", ):
+        self.font = font
+        self.font_size = font_size
+        self.effect = effect
+
+    def updateFont(self, font_size : int | None = None, font : str | None = None, effect : str | None = None):
+        if font: self.font = font
+        if font_size: self.font_size = font_size
+        if effect: self.effect = effect
+        return self
+
+    def to_tuple(self):
+        return (self.font, self.font_size, self.effect)
+
+    def to_tuple_pixels(self, relative_to : Widget | AllowedSpace):
+        return (self.font, self._convert_font_size_to_pixels(relative_to), self.effect)
+
+    def _convert_font_size_to_pixels(self, relative_to : Widget | AllowedSpace) -> int:
+        return int(relative_to.get_size().width/500 * self.font_size)
+
+class Position():
+    PINNED = "Attached to a side of the screen"
+    def __init__(self, 
+            positioned : Positioned = None, 
+            x__pixel_offset_from_left : float | int = None, 
+            y__pixel_offset_from_top : float | int = None, 
+            x__percent_offset_from_left : float | int = None, 
+            y__percent_offset_from_top : float | int = None, 
+            # x__padding_pixel : float | int = None,
+            # y__padding_pixel : float | int = None,
+            # x__padding_percent : float | int = None,
+            # y__padding_percent : float | int = None,
+        ) -> None:
+        self.positioned : Positioned = positioned
+        self.x_offset : float | int = x__pixel_offset_from_left
+        self.y_offset : float | int  = y__pixel_offset_from_top
+        self.x_percent : float | int = x__percent_offset_from_left
+        self.y_percent : float | int = y__percent_offset_from_top
+
+        # self.x__padding_pixel : float | int = x__padding_pixel
+        # self.y__padding_pixel : float | int  = y__padding_pixel
+        # self.x__padding_percent : float | int = x__padding_percent
+        # self.y__padding_percent : float | int = y__padding_percent
+
+        if self.positioned == Positioned.CENTERED:
+            self.positioned = Positioned.INSIDE
+            self.x_percent = 1/2
+            self.y_percent = 1/2
+
+    def __eq__(self, value: object) -> bool:
+        if type(value) != Position:
             return False
+        return self.positioned == value.positioned
 
-        if user_input:
-            self.replace_input_with(user_input)
-        while not self.is_completed():
-            try:
-                self._active_code.get_line()
-            except:
-                print(len(self._code))
-                print(len(self._active_code.lines))
-                print(self._active_code.position)
+    def _get_alignment(object_size : Dimentions, alignment : Alignment):
+        dx = 0
+        dy = 0
+        if alignment.contains(Alignment.CENTER):
+            dx = -object_size.width/2
+            dy = -object_size.height/2
+        if alignment.contains(Alignment.TOP):
+            dy = 0
+        if alignment.contains(Alignment.BOTTOM):
+            dy = -object_size.height
+        if alignment.contains(Alignment.RIGHT):
+            dx = -object_size.width
+        if alignment.contains(Alignment.LEFT):
+            dx = 0
+        return dx, dy
 
-            if self.detect_pause():
-                return Status.PAUSED
-            elif check_functions(self._active_code): 
-                self.next()
-                continue
-            elif (result := self.is_if_statement()) != None:
-                print("is an if statement")
-                if (result := self._active_code.run_if_statement(result)) != None:
-                    self.indent(result)
-                continue
-            else:
-                print(f"if statement result is {result}")
-                print("Assuming must be of another line type")
-                self._active_code.other_line_type()
-            self.next()
-        return Status.COMPLETED
-
-class CodeSegment():
-    def __init__(self, lines : list[str], position : int = 0, repeat = False, DEBUG : bool = False) -> None:
-        self.lines = lines
-        self.position = position
-        self.repeat = repeat
-        self.DEBUG = DEBUG
-        self.completed = False
-
-    def check_for_and_run_function(self, function):
+    def _get_position_before_alignment(position : Position, object_size : Dimentions, relative_to : Widget | AllowedSpace | None):
         DEBUG = False
-        def sort_parameters(full_list):
-            def check_if_named(line):
-                if "=" not in line:
-                    return False
-                temp = line[:line.index("=")]
-                if "'" in temp or '"' in temp:
-                    return False
-                return True
 
-            unnamed_parameters = []
-            named_parameters = {}
-            while len(full_list) > 0:
-                input = full_list.pop(0)
-                if check_if_named(input):
-                    parameter, value = input.split("=")
-                    named_parameters[parameter] = predict_and_convert_to_true_type(value)
-                    continue
-                else:
-                    unnamed_parameters.append(predict_and_convert_to_true_type(input))
-            return unnamed_parameters, named_parameters
+        if relative_to == None:
+            if DEBUG: print("self.relative_to == None")
+            if position.positioned == Positioned.INSIDE:
+                raise Exception("If position set to Position.INSIDE, must give a widget for the widget to be placed inside")
+            if position.positioned == Positioned.BACKGROUND:
+                return (0, 0)
+            x = position.x_offset if position.x_offset != None else 0
+            y = position.y_offset if position.y_offset != None else 0
+            return (x, y)
+        if position.positioned == Positioned.BACKGROUND:
+            if DEBUG: print("self.positioned == Positioned.BACKGROUND")
+            return relative_to.get_position()
+        if position.positioned == Positioned.INSIDE:
+            if DEBUG: print("self.positioned == Positioned.INSIDE")
+            x, y = relative_to.get_position()
 
-        # Check if the line contains the function
-        function_name = function.__name__
-        if DEBUG: print(f"Checking line to see if it calls {function_name}...", end="")
-        line = self.lines[self.position]
-        if not line.startswith(function_name):
-            if DEBUG: print(" Nope")
-            return False
-        if DEBUG: print(" Yep")
-        # Extract the parameters
-        full_list = parse_function(line, function_name)
-        if DEBUG: print(f" All parameters: [{full_list}]")
-        unnamed_parameters, named_parameters = sort_parameters(full_list)
-        if DEBUG: print(f" Sorted into unnamed: {unnamed_parameters} and named: {named_parameters}")
-        # Run the function
-        function(*unnamed_parameters, **named_parameters)
+            # Get size only if needed
+            if position.x_percent != None or position.y_percent != None:
+                size = relative_to.get_size()
+
+            if position.x_percent != None:
+                x += size.width * position.x_percent
+            elif position.x_offset != None:
+                x += position.x_offset
+
+            if position.y_percent != None:
+                y += size.height * position.y_percent
+            elif position.y_offset != None:
+                y += position.y_offset
+
+            return (x, y)
+        if position.positioned == Positioned.BELOW:
+            if DEBUG: print("self.positioned == Positioned.BELOW")
+            x, y  = relative_to.get_position()
+            size = relative_to.get_size()
+            y += object_size.height
+            if position.x_offset != None:
+                x += position.x_offset
+            if position.y_offset != None:
+                y += position.y_offset
+            if position.x_percent != None:
+                x += size.width * position.x_percent
+            if position.y_percent != None:
+                y += size.height * position.y_percent
+        if position.positioned == Positioned.ABOVE:
+            if DEBUG: print("self.positioned == Positioned.ABOVE")
+            x, y  = relative_to.get_position()
+            size = relative_to.get_size()
+            y -= object_size.height
+            if position.x_offset != None:
+                x += position.x_offset
+            if position.y_offset != None:
+                y -= position.y_offset
+            if position.x_percent != None:
+                x += size.width * position.x_percent
+            if position.y_percent != None:
+                y += size.height * position.y_percent
+            return (x, y)
+        if not position.positioned:
+            if DEBUG: print("not Positioned")
+            return (position.x_offset, position.y_offset)
+
+class ProportionalDimentions(Dimentions):
+    def __init__(self, width: float = 0, height: float = 0) -> None:
+        super().__init__(width, height)
+    
+    def to_real_size(self, proportional_to : AllowedSpace | Dimentions | tuple | list):
+        if not proportional_to:
+            raise Exception("Must provide something to be proportional to")
+        pttype = type(proportional_to)
+        if pttype == AllowedSpace or pttype == Dimentions:
+            return Dimentions(proportional_to.width * self.width, proportional_to.height * self.height)
+        return Dimentions(proportional_to[0] * self.width, proportional_to[1] * self.height)
+
+class Widget():
+    def __init__(self, 
+            canvas : Page, resize : Resize = Resize.NEEDED, position : Position = None, 
+            alignment : Alignment = Alignment.CENTER, relative_to : Widget | AllowedSpace = None,
+            size : ProportionalDimentions = ProportionalDimentions(width = 1, height = 1), 
+            padding : Padding = None
+        ):
+        self.canvas = canvas
+        self.resize_status = resize
+        self.position = position if position else Position()
+        self.alignment = alignment
+        self.relative_to = relative_to if relative_to else canvas
+        self.size : ProportionalDimentions = size
+        self.padding = padding if padding else Padding()
+        self.current_position = None
+        self.visible = True
+
+    def get_size(self) -> Dimentions:
+        x1, y1, x2, y2 = self.canvas.bbox(self.id)
+        return Dimentions(x2 - x1, y2 - y1)
+
+    def is_visible(self) -> bool:
+        if not self.visible: return False
+        if self.relative_to:
+            if issubclass(type(self.relative_to), Widget):
+                if not self.relative_to.is_visible(): return False
         return True
 
-    def change_DEBUG(self, DEBUG : bool) -> None:
-        self.DEBUG = DEBUG
+    def resize(self, *ids):
+        # Not just an optimization. Tkinter throws errors if trying to get the size of a non visible widget
+        if not self.is_visible(): return
 
-    def next(self) -> None:
-        """
-        Moves the position to the next line.\n
-        - Returns COMPLETED if reaches end of CodeSegment by doing so.\n
-        - Returns CONTINUING otherwise.
-        """
-        self.position += 1
-        if self.position >= len(self.lines):
-            self.completed = True
-            return Status.COMPLETED
-        Status.CONTINUING
+        # Resizes widget
+        self.resize_status = Resize.IN_PROCESS
+        for id in ids:
+            self._update_current_poisition()
+            self.canvas.moveto(id, *self.current_position)
 
-    def get_line(self) -> str:
-        return self.lines[self.position]
+    def set_on_click(self, function):
+        if function != None:
+            self.canvas.tag_bind(self.id, '<Button-1>', lambda _: function())
+        return self
 
-    def is_if_statement(self):
-        """
-        - returns None if not an if statement
-        - returns the True/False falue of the statement if is an if statement
-        note: if, elif, and else statements all count as a type of if statement for this function's purposes
-        """
-        def turn_line_into_True_or_False(line : str) -> bool:
-            if not line.endswith(":"):
-                raise Exception("If statement does not include a semicolon at the end")
-            if line.startswith("if"):
-                line = line.removeprefix("if")
-            elif line.startswith("elif"):
-                line = line.removeprefix("elif")
-            line = line.removesuffix(":").strip()
-            line = squish_array(split(line), DEBUG=False)[0]
-            if line == None:
-                raise Exception('An "if" statement cannot be empty.\n You probably used "=" instead of "==".')
-            return line
+    def get_space_this_widget_takes_up(self):
+        size = self.get_size()
+        x, y = self.get_position()
+        return AllowedSpace(width=size.width, height=size.height, x=x, y=y)
 
-        line = self.get_line()
-        startsw = line.startswith("if")
-        if line.startswith("else"):
-            if not (line.strip() == "else:"):
-                raise Exception('Incorrectly formated "else:"')
-            line = "if True:"
-        if not (line.startswith("if") or line.startswith("elif")):
-            return None
-        return turn_line_into_True_or_False(line)
+    def get_position(self) -> tuple[int, int]:
+        return self.current_position
 
-    def run_if_statement(self, boolean):
-        if self.DEBUG: print(f"If statement is {boolean}")
-        if self.DEBUG: print(f" and line_i is {self.position}")
-        if self.DEBUG: print(f" and the line is {print_line(self.lines, self.position)}")
-        if boolean:
-            # If statement is true
-            self.next()
-            if self.completed:
-                raise Exception("If type statements must have some code under them.")
-            # Grab all lines in the if
-            indeneted_statements = []
-            while(self.lines[self.position].startswith("    ")):
-                indeneted_statements.append(self.lines[self.position].removeprefix("    "))
-                self.next()
-                if self.completed: break
-            if self.completed:
-                # Return the CodeSegment that was under the if
-                return indeneted_statements
-            # Skip over any elif or else statements after the if
-            while self.lines[self.position].startswith("elif") or self.lines[self.position].startswith("else"):
-                self.find_next_not_indented()
-                if self.completed: break
-            # Return the CodeSegment that was under the if
-                # if self.DEBUG: print(f"{len(self.lines)}")
-                # if self.DEBUG: print(f"line_i  is {self.position} ({print_line(self.lines, self.position)})")
-            return indeneted_statements
+    def _update_current_poisition(self):
+        object_size = self.get_size()
+        x, y = Position._get_position_before_alignment(position=self.position, object_size=object_size, relative_to=self.relative_to)
+        ax, ay = Position._get_alignment(object_size, self.alignment)
+        px, py = self.padding.get_padding_delta(self.position.positioned, object_size, position_so_far=(x + ax, y + ay), available_space=self.relative_to.get_size())
+        # print(x, ax, px)
+        # print(y, ay, py)
+        self.current_position = (x + ax + px, y + ay + py)
+        return self.current_position
+
+    def get_widget_size(self) -> Dimentions:
+        return self.size.to_real_size(self.relative_to.get_size())
+
+    def _change_visability(self, visibility : bool):
+        self.visible = visibility
+        self.canvas.itemconfigure(self.id, state='normal' if visibility else 'hidden')
+
+    def show(self):
+        return self._change_visability(True)
+
+    def hide(self):
+        return self._change_visability(False)
+
+class TextWidget(Widget):
+    def __init__(self, 
+                 canvas : Page, 
+                 text : str = "", 
+                 font_details : FontDetails = None,
+                 text_alignment : str = "left", 
+                 position : Position = None,
+                 alignment : Alignment = Alignment.CENTER, 
+                 relative_to : Widget | AllowedSpace = None,
+                 size : ProportionalDimentions = ProportionalDimentions(width = 1, height = 1),
+                 padding : Padding = None
+            ) -> None:
+        Widget.__init__(self, canvas, position=position, alignment=alignment, relative_to=relative_to, size=size, padding=padding)
+        self.font_details : FontDetails = font_details
+        self.id = canvas.create_text(0, 0, text=text, font=(self.font_details.font, self.font_details.font_size, self.font_details.effect), justify=text_alignment)
+
+    def set_font(self, 
+            font_size : int | None = None, 
+            font : str | None = None, 
+            effect : str | None = None,
+            new_font : FontDetails | None = None,
+        ):
+        # Update font
+        if new_font:
+            self.font_details = new_font
         else:
-            # If statement is false
-            # Skip over all lines in the if
-            self.find_next_not_indented()
-            return None
+            self.font_details.updateFont(font_size, font, effect)
 
-    def find_next_not_indented(self) -> Status:
-        """
-        Moves the position to the next line that is not indented.\n
-        - Returns COMPLETED if reaches end of CodeSegment by doing so.\n
-        - Returns CONTINUING otherwise.
-        """
-        # At an if or elif statement
-        # +1 moves to first line in the indent (1 line must exist, otherwise error in code editor)
-        self.next()
-        # Skip over each line with an indent
-        while(self.position < len(self.lines) and self.lines[self.position].startswith("    ")):
-            if self.next() == Status.COMPLETED:
-                # Could have hit end of file
-                return Status.COMPLETED
-        # self.position should be set to next line not a part of the if or elif satement
-        if self.DEBUG: print(f" and the next line not a part of the if is {print_line(self.lines, self.position)}")
-        return Status.CONTINUING
+        # Update visuals to refect new font
+        self.update_font()
+        
+        if (font_size != None or font != None or effect != None or new_font != None):
+            # If font size is different, may need to move the text widget so that it is still properly aligned
+            self.resize()
+        return self
 
-    def detect_pause(self):
-        line = self.get_line()
-        return "input" in line and not ("'" in line or '"' in line)
+    def set_text_alignment(self, alignment : str | None = None):
+        if alignment != None: 
+            self.canvas.itemconfigure(self.id, justify=alignment)
+        return self
 
-    def replace_input_with(self, new_content):
-        if (type(new_content)) == str:
-            new_content = f'"{new_content}"'
-        self.lines[self.position] = self.get_line().replace("input()", new_content)
+    def set_text(self, text : str | None = None):
+        if text != None:
+            self.canvas.itemconfigure(self.id, text = text)
+            self.resize()
+        return self
 
-    def other_line_type(self):
-        DEBUG = True
-        self.lines[self.position] = squish_array(split(self.get_line()), DEBUG=DEBUG)[0]
+    def update_font(self):
+        self.canvas.itemconfigure(self.id, font = self.font_details.to_tuple_pixels(self.relative_to))
 
-def print_line(lines, position):
-    return lines[position] if position < len(lines) else "EOF"
+    def resize(self):
+        super().resize(self.id)
+        if not self.is_visible(): return
 
-def parse(their_code : list, user_selection = None, DEBUG = False) -> tuple[list, Status]:
-    """
-    """
-    if their_code == []: return [], Status.COMPLETED
-    their_code_active = their_code[len(their_code)-1][0]
-    line_i = their_code[len(their_code)-1][1]
-    if DEBUG: print(f"Starting new parse run with code of length {len(their_code_active)}")
+        self.update_font()
+        # widget_size : Dimentions = self.get_size()
+        # screen : Dimentions = self.canvas.get_size()
+        # self.position.relative_to = AllowedSpace(dimensions=screen)
+        
+        # self.canvas.moveto(self.id, screen.width/2 - widget_size.width/2, screen.height/2 - widget_size.height/2)
 
-    if user_selection != None:
-        their_code_active[line_i] = their_code_active[line_i].replace("input()", f'"{user_selection}"')
 
-    options = []
-    while (len(their_code) > 0):
-        their_code_active = their_code[len(their_code)-1][0]
-        line_i = their_code[len(their_code)-1][1]
-        while line_i < len(their_code_active):
-            line = their_code_active[line_i]
-            # Check to see if line is print_player
-            if ("print_player" in line):
-                parts = parse_function(line, "print_player")
-                whole = ""
-                for a in parts:
-                    whole = " " + a
-                if whole != "":
-                    whole = whole[1:]
-                options.append(whole)
+class DebugWidget(Widget):
+    def __init__(self, canvas: Page, DEBUG : bool = False, vertical_lines : int | bool = True, horizontal_lines : int | bool = True, lines : tuple[int, int] | None = None):
+        super().__init__(canvas)
+        self.enabled = DEBUG
+        if not self.enabled: return
+
+        vertical_lines_count = vertical_lines if type(vertical_lines) == int else (1 if vertical_lines else 0)
+        if lines: vertical_lines_count = lines[1]
+        self.add_vertical_lines(vertical_lines_count, Dimentions(1, 1))
+
+        horizontal_lines_count = horizontal_lines if type(horizontal_lines) == int else (1 if horizontal_lines else 0)
+        if lines: horizontal_lines_count = lines[0]
+        self.add_horiztonal_lines(horizontal_lines_count, Dimentions(1, 1))
+
+    def add_vertical_lines(self, count : int, screen : Dimentions):
+        self.vertical_lines = []
+        number_of_lines = count + 1
+        for i in range(count):
+            self.vertical_lines.append(self.canvas.create_line((screen.width * (i+1)/number_of_lines, 0), (screen.width * (i+1)/number_of_lines, screen.height), fill="blue"))
+
+    def add_horiztonal_lines(self, count : int, screen : Dimentions):
+        self.horizontal_lines = []
+        number_of_lines = count + 1
+        for i in range(count):
+            self.horizontal_lines.append(self.canvas.create_line((0, screen.height * (i+1)/number_of_lines), (screen.width, screen.height * (i+1)/number_of_lines), fill="blue"))
+
+    def resize(self):
+        super().resize()
+
+        if not self.enabled: return
+        screen = self.canvas.get_size()
+        
+        vertical_lines_count = len(self.vertical_lines)
+        for line in self.vertical_lines:
+            self.canvas.delete(line)
+        self.add_vertical_lines(vertical_lines_count, screen)
+
+        horizontal_lines_count = len(self.horizontal_lines)
+        for line in self.horizontal_lines:
+            self.canvas.delete(line)
+        self.add_horiztonal_lines(horizontal_lines_count, screen)
+
+class Padding():
+    def __init__(self, 
+            top__pixels : int = None, 
+            top__percent : float = None, 
+            bottom__pixels : int = None, 
+            bottom__percent : float = None, 
+            left__pixels : int = None, 
+            left__percent : float = None, 
+            right__pixels : int = None, 
+            right__percent : float = None, 
+        ) -> None:
+        self.top__pixels = top__pixels
+        self.top__percent = top__percent
+        self.bottom__pixels = bottom__pixels
+        self.bottom__percent = bottom__percent
+        self.left__pixels = left__pixels
+        self.left__percent = left__percent
+        self.right__pixels = right__pixels
+        self.right__percent = right__percent
+
+    def get_padding_delta(self, 
+            position : Positioned, 
+            widget_size : Dimentions, 
+            position_so_far : tuple[float, float],
+            available_space : Dimentions,
+        ):
+        if position == Positioned.INSIDE:
+            positioned = []
+            x, y = position_so_far
+            midway_point_x = available_space.width/2
+            midway_point_y = available_space.height/2
+            if x > midway_point_x:
+                positioned.append(Positioned.RIGHT)
             else:
-                # If it is not another print_player, add all print_players up to this point to last action
-                if len(options) > 0:
-                    if (len(actions) < 1): 
-                        actions.append({"user_options" : options})
-                    else:
-                        actions[len(actions)-1]["user_options"] = options
-                    options = []
-                # Other possible line contents
-                if ("input" in line and not ("'" in line or '"' in line)):
-                    their_code[len(their_code)-1][1] = line_i
-                    return their_code, Status.PAUSED
-                elif ("print_character" in line):
-                    if DEBUG: print(line)
-                    parts = parse_function(line, "print_character")
-                    if len(parts) < 1:
-                        parts.append("")
-                    if len(parts) > 2:
-                        raise Exception(f"{line_i} : The function print_character takes at most two arguments")
-                    dictionary = {
-                        "character_speaks" : parts[0]
-                    }
-                    if len(parts) > 1:
-                        dictionary["character_portrait_changes"] = parts[1]
-                    actions.append(dictionary)
-                    if DEBUG: print("action added")
-                else:
-                    if line.startswith("else"):
-                        if not (line.strip() == "else:"):
-                            raise Exception('Incorrectly formated "else:"')
-                        line = "if True:"
-                    if line.startswith("if") or line.startswith("elif"):
-                        if not line.endswith(":"):
-                            raise Exception("If statement does not include a semicolon at the end")
-                        if line.startswith("if"):
-                            line = line.removeprefix("if")
-                        elif line.startswith("elif"):
-                            line = line.removeprefix("elif")
-                        line = line.removesuffix(":").strip()
-                        line = squish_array(split(line), DEBUG=False)[0]
-                        if line == None:
-                            raise Exception('An "if" statement cannot be empty.\n You probably used "=" instead of "==".')
-                        if line:
-                            if DEBUG: print("If statement IS true")
-                            if DEBUG: print(f" and line_i is {line_i}")
-                            if DEBUG: print(f" and the line is {print_line(their_code_active, line_i)}")
-                            child_statements = []
-                            line_i += 1
-                            while(line_i < len(their_code_active) and their_code_active[line_i].startswith("    ")):
-                                child_statements.append(their_code_active[line_i].removeprefix("    "))
-                                line_i += 1
-                            while line_i < len(their_code_active) and (their_code_active[line_i].startswith("elif") or their_code_active[line_i].startswith("else")):
-                                line_i +=1
-                                while(their_code_active[line_i].startswith("    ")):
-                                    line_i += 1
-                                    if (line_i >= len(their_code_active)):
-                                        break
-                                    # else:
-                                    #     if DEBUG: print(their_code_active[line_i])
-                                if line_i >= len(their_code_active):
-                                    break
-                            if DEBUG: print(f"{len(their_code_active)}")
-                            if DEBUG: print(f"line_i  is {line_i } ({print_line(their_code_active, line_i)})")
-                            their_code[len(their_code)-1][1] = line_i
-                            their_code.append([child_statements, 0])
-                            if DEBUG: print(f"running parse again with {len(child_statements)} child statements")
-                            their_code, result  = parse(their_code)
-                            # if (result == status.PAUSED):
-                            return their_code, result
-                            # their_code.pop()
-                            # their_code_active = their_code[len(their_code)-1][0]
-                            # line_i = their_code[len(their_code)-1][1]
-                            # line_i += 1
-                            continue
-                        else:
-                            if DEBUG: print(f"If statement {print_line(their_code_active, line_i)} is false")
-                            line_i += 1
-                            while(line_i < len(their_code_active) and their_code_active[line_i].startswith("    ")):
-                                line_i += 1
-                            if DEBUG: print(f" and the next line not a part of the if is {print_line(their_code_active, line_i)}")
-                            line_i -= 1
-                    else:
-                        line = squish_array(split(line), DEBUG=False)[0]
-            if DEBUG: print("+1")
-            line_i += 1
-        their_code.pop()
-
-
-
-
-
-                # split_line = split(line)
-
-
-                # for i in range(len(split_line)):
-                #     for variable in variables.keys():
-                #         if split_line[i].strip() == variable:
-                #             split_line[i] = variables[variable]
-                # print(f" split line = {split_line}")
-                # # print(line)
-                # if len(split_line) == 3:
-                #     if (split_line[1] == "="):
-                #         variables[split_line[0].strip()] = split_line[2]
-                #         print(variables)
-    # If it is not another print_player, add all print_players up to this point to last action
-    if len(options) > 0:
-        if (len(actions) < 1): 
-            actions.append({"user_options" : options})
+                positioned.append(Positioned.LEFT)
+            if y > midway_point_y:
+                positioned.append(Positioned.ABOVE)
+            else:
+                positioned.append(Positioned.BELOW)
         else:
-            actions[len(actions)-1]["user_options"] = options
-        options = []
-    if len(their_code) > 0:
-        print(f"len of their code {len(their_code)}")
-        their_code[len(their_code)-1][1] = line_i
-    return their_code, Status.COMPLETED
+            positioned = [position]
 
-def print_actions():
-    # print()
+        dx = 0
+        dy = 0
+        if Positioned.BELOW in positioned:
+            if self.top__pixels:
+                dy += self.top__pixels
+            if self.top__percent:
+                dy += widget_size.height * self.top__percent
+        if Positioned.ABOVE in positioned:
+            if self.bottom__pixels:
+                dy -= self.bottom__pixels
+            if self.bottom__percent:
+                dy -= widget_size.height * self.bottom__percent
+        if Positioned.RIGHT in positioned:
+            if self.left__pixels:
+                dx += self.left__pixels
+            if self.left__percent:
+                dx + widget_size.width * self.left__percent
+        if Positioned.LEFT in positioned:
+            if self.right__pixels:
+                dx -= self.right__pixels
+            if self.right__percent:
+                dx -= widget_size.width * self.right__percent
 
-    # for a in range(line_i):
-    #     print(their_code[a])
+        return (dx, dy)
 
-    # print()
 
-    for a in actions:
-        print(a)
+class BlankPage(Page):
+    def __init__(self, parent):
+        Page.__init__(self, parent)
+        self.portrait = ImageWidget(
+            canvas=self, 
+            photo=Photo().load_portrait("confident"), 
+            position=Position(positioned=Positioned.CENTERED)
+        )
+        self.textbox = ImageWidget(
+            canvas=self, 
+            photo=Photo().load_image("Picture1.png"), 
+            position=Position(positioned=Positioned.INSIDE, x__percent_offset_from_left=1/2, y__percent_offset_from_top=1),
+            alignment=Alignment.BOTTOM, 
+            padding=Padding(bottom__percent=1/10), 
+            size = ProportionalDimentions(2/3, 1/3), 
+            relative_to=self.portrait, 
+            keep_image_ratio=False,
+        ).set_on_click(function=self.switch_to_options)
+        # parent.next
+        self.character_name = TextWidget(
+            canvas=self, text="MOCHI", 
+            font_details=FontDetails(font_size=20, effect="bold"), 
+            text_alignment="left", 
+            position = Position(positioned=Positioned.INSIDE, x__percent_offset_from_left=1/15, y__percent_offset_from_top=1/15),
+            relative_to=self.textbox, 
+            alignment=Alignment.TOPLEFT,
+        )
+        self.main_text = TextWidget(
+            canvas=self, text="whatever",
+            font_details=FontDetails(font_size=15),
+            text_alignment="left", 
+            position = Position(positioned=Positioned.INSIDE, x__percent_offset_from_left=1/15, y__percent_offset_from_top=1/5),
+            relative_to=self.textbox, 
+            alignment=Alignment.TOPLEFT,
+        )
+        self.bottom_small_textbox = ImageWidget(
+            canvas=self, 
+            photo=Photo().load_image("Picture1Small.png"), 
+            position=Position(positioned=Positioned.INSIDE, x__percent_offset_from_left=1/2, y__percent_offset_from_top=1),
+            alignment=Alignment.BOTTOM, 
+            padding=Padding(bottom__percent=1/10), 
+            size = ProportionalDimentions(2/3, 1/10), 
+            relative_to=self.portrait, 
+            keep_image_ratio=False,
+        ).set_on_click(self.switch_to_character_speaking)
+        self.middle_small_textbox = ImageWidget(
+            canvas=self, 
+            photo=Photo().load_image("Picture1Small.png"), 
+            position=Position(positioned=Positioned.ABOVE),
+            alignment=Alignment.TOPLEFT, 
+            padding=Padding(bottom__percent=1/10), 
+            relative_to=self.bottom_small_textbox, 
+            keep_image_ratio=False,
+        )
+        self.top_small_textbox = ImageWidget(
+            canvas=self, 
+            photo=Photo().load_image("Picture1Small.png"), 
+            position=Position(positioned=Positioned.ABOVE),
+            alignment=Alignment.TOPLEFT, 
+            padding=Padding(bottom__percent=1/10), 
+            relative_to=self.middle_small_textbox, 
+            keep_image_ratio=False,
+        )
+        self.texts = [
+            TextWidget(
+            canvas=self, text="Option 3",
+            font_details=FontDetails(font_size=15),
+            text_alignment="center",
+            position=Position(positioned=Positioned.INSIDE, x__percent_offset_from_left=1/15, y__percent_offset_from_top=1/5),
+            relative_to=a,
+            alignment=Alignment.TOPLEFT,
+            padding=Padding(top__percent=0.5, left__percent=0.5),
+        ) for a in [self.bottom_small_textbox, self.middle_small_textbox, self.top_small_textbox]
+        ]
+        self.DEBUG = DebugWidget(canvas=self, DEBUG = False)
+        for a in [self.bottom_small_textbox, self.middle_small_textbox, self.top_small_textbox]:
+            a.hide()
+        for a in self.texts:
+            a.hide()
 
-def flatten_text(*text):
-    content : str = ""
-    for i in range(len(text)):
-        if i != 0:
-            content += " "
-        content += str(text[i])
-    return content
+    def switch_to_options(self):
+        for a in [self.bottom_small_textbox, self.middle_small_textbox, self.top_small_textbox]:
+            a.show()
+        for a in self.texts:
+            a.show()
+        for a in [self.textbox, self.character_name, self.main_text]:
+            a.hide()
 
-def print_character(*text, mood : str = None):
-    DEBUG = False
-    parts = list(text)
-    if len(parts) < 1:
-        parts.append("")
-    dictionary = {"character_speaks" : flatten_text(*text)}
-    if mood:
-        dictionary["character_portrait_changes"] = mood
-        if DEBUG: print("mood changed")
-    actions.append(dictionary)
-    if DEBUG: print("action added")
+    def switch_to_character_speaking(self):
+        for a in [self.bottom_small_textbox, self.middle_small_textbox, self.top_small_textbox]:
+            a.hide()
+        for a in self.texts:
+            a.hide()
+        for a in [self.textbox, self.character_name, self.main_text]:
+            a.show()
 
-def print_player(*text):
-    DEBUG = False
-    if len(actions) == 0: actions.append({})
-    if "user_options" in actions[len(actions)-1].keys():
-        actions[len(actions)-1]["user_options"] += [flatten_text(*text)]
-    else:
-        # actions[len(actions)-1]["user_options"] = [flatten_text(*text)]
-        actions.append({"user_options" : [flatten_text(*text)]})
-    if DEBUG: print("option added")
+class InterviewPage(Page):
+    def __init__(self, parent):
+        Page.__init__(self, parent)
+        self.portrait = Photo()
+        self.portrait.load_portrait("normal")
+        self.available_size : Dimentions = None
+        self.canvas_textbox : Textbox = Textbox("Picture1.png")
+        self.canvas_user_options_textboxes : list[Textbox] = []
+        self.inital_text = None
+        self.dont_change_size = True
+
+
+class ImageWidget(Widget):
+    def __init__(self, 
+                canvas: Page, 
+                photo: Photo | None,
+                resize: Resize = Resize.NEEDED, 
+                position: Position = None, 
+                size : ProportionalDimentions = ProportionalDimentions(width = 1, height = 1), 
+                alignment: Alignment = Alignment.CENTER, 
+                relative_to : Widget | AllowedSpace = None,
+                padding : Padding = None, 
+                keep_image_ratio : bool = True,
+            ):
+        super().__init__(canvas, resize, position, alignment, relative_to=relative_to, size=size, padding=padding)
+
+        self.keep_image_ratio = keep_image_ratio
+
+        if photo == None:
+            raise Exception("Must provide a photo of some kind. Provided None.")
+        self.photo = photo
+
+        self.id = self.canvas.create_image(0, 0, image = self.photo.image, anchor=tk.NW)
+
+    def resize(self):
+        super().resize(self.id)
+        if not self.is_visible(): return
+
+        real_size = self.get_widget_size()
+        # if not self.id == 1:
+        #     if self.id == 3: print()
+        #     print(self.id, self.current_position, real_size)
+        if self.keep_image_ratio:
+            self.photo.update(real_size.width, real_size.height)
+        else:
+            self.photo.force_resize(real_size.width, real_size.height)
+        self.canvas.itemconfigure(self.id, image = self.photo.image)
 
 if __name__ == "__main__":
-    their_code = Code(get_their_code())
-    status = their_code.run_to_pause_or_end()
-    Window(their_code)
-    tk.mainloop()
+    code = load_code()
+    Window(code).run()
