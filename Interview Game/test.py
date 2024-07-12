@@ -20,7 +20,7 @@ if (x == "1"):
     print_player("Bad1")
     print_player("Good2")
     print_player("MEH3") # is the "meh" one
-    x = input()
+    # x = input()
     if (x == input()):
         print_character("How's it going again")
     else:
@@ -34,5 +34,3 @@ else:
     print_character("How's it going (else)")
     print_player("Bad")
     print_player("Good")
-
-print_character("How's it going (end)")

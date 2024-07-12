@@ -43,10 +43,10 @@ class Code():
                 return Status.PAUSED
             return None
         status = self.run_to_pause_or_end(user_input=user_input)
-        if status == Status.PAUSED: return Status.PAUSED
         if len(self.actions) > self.current:
             return self.next_line()
-        return None
+        if status == Status.PAUSED: return Status.PAUSED
+        return Status.COMPLETED
 
     def _update_active(self) -> None:
         self._active_code : CodeSegment = self._code[len(self._code)-1]
