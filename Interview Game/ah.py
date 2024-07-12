@@ -1036,17 +1036,50 @@ class IntroPage(Page):
             alignment=Alignment.TOPLEFT,
             keep_image_ratio=False,
         )
+        self.text_textbox= ImageWidget(
+            canvas=self, 
+            photo=Photo().load_image("Picture1SmallUpgraded.png"), 
+            name = "Bottom textbox",
+            position=Position(positioned=Positioned.INSIDE, x__percent_offset_from_left=1/2, y__percent_offset_from_top=1/4),
+            alignment=Alignment.CENTER, 
+            size = ProportionalDimentions(2/3, 1/9), 
+            keep_image_ratio=False,
+        )
         self.text = TextWidget(
-            canvas=self, text="INTRO",
+            canvas=self, text="The INTERVIEW",
             font_details=FontDetails(font_size=25, effect="bold"),
             text_alignment="center",
-            position = Position(positioned=Positioned.INSIDE, x__percent_offset_from_left=1/2, y__percent_offset_from_top=1/2),
+            position = Position(positioned=Positioned.INSIDE, x__percent_offset_from_left=1/2, y__percent_offset_from_top=1/4),
+            alignment=Alignment.CENTER
+        )
+        self.start_button_textbox= ImageWidget(
+            canvas=self, 
+            photo=Photo().load_image("Picture1SmallUpgraded.png"), 
+            name = "Bottom textbox",
+            position=Position(positioned=Positioned.INSIDE, x__percent_offset_from_left=1/2, y__percent_offset_from_top=3/4),
+            alignment=Alignment.CENTER, 
+            size = ProportionalDimentions(1.5/6, 1/10), 
+            keep_image_ratio=False,
+        )
+        self.start_button = TextWidget(
+            canvas=self, text="Start",
+            font_details=FontDetails(font_size=25, effect="bold"),
+            text_alignment="center",
+            position = Position(positioned=Positioned.INSIDE, x__percent_offset_from_left=1/2, y__percent_offset_from_top=3/4),
             alignment=Alignment.CENTER
         ).set_on_click(parent.start_game)
 
 class BlankPage(Page):
     def __init__(self, parent):
         Page.__init__(self, parent)
+        self.background = ImageWidget(
+            canvas=self,
+            photo=Photo().load_portrait("start game screen background"),
+            position=Position(positioned=Positioned.BACKGROUND),
+            size=ProportionalDimentions(1, 1),
+            alignment=Alignment.TOPLEFT,
+            keep_image_ratio=False,
+        )
         self.text = TextWidget(
             canvas=self, text="GAME OVER",
             font_details=FontDetails(font_size=35, effect="bold"),
@@ -1100,6 +1133,8 @@ class ImageWidget(Widget):
             self.photo.force_resize(real_size.width, real_size.height)
         self.canvas.itemconfigure(self.id, image = self.photo.image)
 
+import sys
+
 if __name__ == "__main__":
-    code = load_code()
-    Window(code).run()
+    window = Window(code=load_code(sys.argv[1] if len(sys.argv) > 1 else "test.py"))
+    window.run()
