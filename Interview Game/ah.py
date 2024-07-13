@@ -188,6 +188,7 @@ class Window(tk.Tk):
         self.geometry(f'{self.screen_dimentions.width}x{self.screen_dimentions.height}')
 
         self.page = IntroPage(self)
+        self.character_name = "Mochi"
         # self.interivew_page.hide()
         # self.game_over_page = BlankPage(self)
         # self.game_over_page.hide()
@@ -248,20 +249,22 @@ class Window(tk.Tk):
     #     self.screen_dimentions = Dimentions(width, height)
     #     self.fill_canvas()
 
-    # def Type(self, text="text"):
-    #     self.type_called_count +=1
-    #     my_type_called_count = self.type_called_count
-    #     # Clear previous text
-    #     # self.displayed_text["text"] = ""
-    #     self.interivew_page.itemconfigure(self.canvas_textbox.text, text="")
-    #     self.update()
-    #     # Type out new text one character at a time.
-    #     for i in range(len(text)+1):
-    #         if my_type_called_count != self.type_called_count: return
-    #         # self.displayed_text["text"] = text[0: i]
-    #         self.interivew_page.itemconfigure(self.canvas_textbox.text, text=text[0: i])
-    #         self.update()
-    #         time.sleep(0.05)
+    def type(self, text="text"):
+        self.type_called_count +=1
+        my_type_called_count = self.type_called_count
+        # Clear previous text
+        # self.displayed_text["text"] = ""
+        self.page.update_text("Mochi", "")
+        # self.interivew_page.itemconfigure(self.canvas_textbox.text, text="")
+        self.update()
+        # Type out new text one character at a time.
+        for i in range(len(text)+1):
+            if my_type_called_count != self.type_called_count: return
+            # self.displayed_text["text"] = text[0: i]
+            # self.interivew_page.itemconfigure(self.canvas_textbox.text, text=text[0: i])
+            self.page.update_text(self.character_name, text=text[0:i])
+            self.update()
+            time.sleep(0.05)
 
     def start_game(self):
         self.page.pack_forget()
@@ -272,7 +275,7 @@ class Window(tk.Tk):
 
 
     def next(self, user_action = None):
-        DEBUG = False
+        DEBUG = True
 
         if DEBUG and user_action: print(f"! A USER ACTION WAS GIVEN !\n   {user_action}")
         # if not self.available_size:
@@ -284,6 +287,8 @@ class Window(tk.Tk):
         if (current_actions == Status.COMPLETED) or not current_actions:
             current_actions = {"Note" : "Game Over"}
         keys = current_actions.keys()
+        if "character_name_changes" in keys:
+            self.character_name = current_actions["character_name_changes"]
         if "character_portrait_changes" in keys:
             character_mood : str = current_actions["character_portrait_changes"]
             # temp = (self.portrait.image.width(), self.portrait.image.height())
@@ -312,8 +317,8 @@ class Window(tk.Tk):
         if "character_speaks" in keys:
             # self.canvas_textbox.show(canvas=self.interivew_page)
             # self.Type(current_actions["character_speaks"])
-            self.page.update_text("Mochi", current_actions["character_speaks"])
             self.page.switch_to_character_speaking()
+            self.type(text=current_actions["character_speaks"])
         # else:
         #     self.canvas_textbox.hide(canvas=self.interivew_page)
         if "Note" in keys:
@@ -912,7 +917,7 @@ class InterviewPage(Page):
         )
         self.main_text = TextWidget(
             canvas=self, text="whatever",
-            font_details=FontDetails(font_size=15),
+            font_details=FontDetails(font_size=20),
             text_alignment="left", 
             position = Position(positioned=Positioned.INSIDE, x__percent_offset_from_left=1/15, y__percent_offset_from_top=1/5),
             relative_to=self.textbox, 

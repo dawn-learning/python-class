@@ -1,36 +1,21 @@
-from interviewprint import print_character, print_player
+from interviewprint import print_character_dialogue, print_player_options
 
+print_character_dialogue("what.", character_name="Amy")
+print_player_options("HI how are you?")
+print_player_options("WHAT!")
+print_player_options("Go away.")
 
-# print("hi")
+user_input = input()
 
-
-# x = input()
-# if (x == 1):
-#     print(x)
-
-print_character("Hi player", mood="charming")
-print_character("Going well?")
-print_player("HI")
-print_player("How's it going")
-print_player("go away")
-
-x = input()
-if (x == "1"):
-    print_character("How's it going (x == 1)")
-    print_player("Bad1")
-    print_player("Good2")
-    print_player("MEH3") # is the "meh" one
-    # x = input()
-    if (x == input()):
-        print_character("How's it going again")
-    else:
-        print_character("How's it going again but not 2")
-elif (x == "2"):
-    print_character("How's it going (x == 2)")
-    print_player("import")
-    print_player("Good")
-    print_player("MEH")
+if user_input == "1":
+    print_character_dialogue("I'm fine.")
+elif user_input == "2":
+    print_character_dialogue("Was 2")
 else:
-    print_character("How's it going (else)")
-    print_player("Bad")
-    print_player("Good")
+    print_character_dialogue("That was rude.", mood="angry")
+
+print_character_dialogue("Goodbye")
+
+# visual novel
+# interactive fiction
+# text adventure

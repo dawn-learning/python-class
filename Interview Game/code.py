@@ -106,7 +106,7 @@ class Code():
     def run_to_pause_or_end(self, user_input : str = None):
         DEBUG = False
         def check_functions(segment):
-            for function in [print_character, print_player]:
+            for function in [print_character_dialogue, print_player_options]:
                 if segment.check_for_and_run_function(function):
                     return True
             return False

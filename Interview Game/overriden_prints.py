@@ -7,7 +7,7 @@ def flatten_text(*text):
         content += str(text[i])
     return content
 
-def print_character(*text, actions, mood : str = None):
+def print_character_dialogue(*text, actions, mood : str = None, character_name : str = None):
     DEBUG = False
     parts = list(text)
     if len(parts) < 1:
@@ -16,10 +16,13 @@ def print_character(*text, actions, mood : str = None):
     if mood:
         dictionary["character_portrait_changes"] = mood
         if DEBUG: print("mood changed")
+    if character_name:
+        dictionary["character_name_changes"] = character_name
+        if DEBUG: print("name changed")
     actions.append(dictionary)
     if DEBUG: print("action added")
 
-def print_player(*text, actions):
+def print_player_options(*text, actions):
     DEBUG = False
     if len(actions) == 0: actions.append({})
     if "user_options" in actions[len(actions)-1].keys():
