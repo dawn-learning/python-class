@@ -12,7 +12,6 @@ character_mood = "normal"
 
 character_portraits = {
     "normal" : "https://static.wikia.nocookie.net/slimerancher/images/2/2b/MochiDefault.png/revision/latest/scale-to-width-down/1000?cb=20180317174715", 
-    # "normal" : "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwww.solidbackgrounds.com%2Fimages%2F2560x1440%2F2560x1440-blue-solid-color-background.jpg&f=1&nofb=1&ipt=d0b034ef2889b452d604bebc5d1421b6f921356bd47650a96bb69c33436164d5&ipo=images",
     "icon" : "https://external-content.duckduckgo.com/iu/?u=http%3A%2F%2Fvignette3.wikia.nocookie.net%2Fslimerancher%2Fimages%2F8%2F80%2FMochi_update.png%2Frevision%2Flatest%2Fscale-to-width-down%2F350%3Fcb%3D20160420041618&f=1&nofb=1&ipt=32f4792edf02a1309221f888c328fcbab975cb48c475284fb8a3d985201e871a&ipo=images",
     "angry" : "https://static.wikia.nocookie.net/slimerancher/images/d/d6/MochiAngry.png/revision/latest/scale-to-width-down/1000?cb=20180317174315", 
     "boastful" : "https://static.wikia.nocookie.net/slimerancher/images/9/9e/MochiBoastful.png/revision/latest/scale-to-width-down/1000?cb=20180317174331", 
@@ -44,8 +43,6 @@ class Photo():
         url = character_portraits[mood]
         with urllib.request.urlopen(url) as u:
             raw_data = u.read()
-        # image = ImageTk.PhotoImage(Image.open().resize((350, 350)))
-        # return image
         self.load_image(io.BytesIO(raw_data))
         return self
 
@@ -189,79 +186,19 @@ class Window(tk.Tk):
 
         self.page = IntroPage(self)
         self.character_name = "Mochi"
-        # self.interivew_page.hide()
-        # self.game_over_page = BlankPage(self)
-        # self.game_over_page.hide()
-        # self.next()
 
     def run(self):
         self.mainloop()
-
-    # def fill_canvas(self):
-    #     self.interivew_page.delete("all")
-    #     self.portrait.update(self.screen_dimentions.width, self.screen_dimentions.height)
-    #     self.available_size = Dimentions(self.portrait.width, self.portrait.height)
-    #     new_offset = Dimentions(int((self.screen_dimentions.width-self.available_size.width)/2), int((self.screen_dimentions.height-self.available_size.height)/2))
-    #     self.center_screen_offset = new_offset
-
-    #     self.portrait_spot = self.interivew_page.create_image(
-    #         self.center_screen_offset.width + (self.available_size.width - self.portrait.width)/2, 
-    #         self.center_screen_offset.height + (self.available_size.height - self.portrait.height)/2, 
-    #         image = self.portrait.image, anchor=tk.NW)
-
-    #     self._create_canvas()
-
-    # def _create_canvas(self, small_count : int | None = None):
-    #     # self.canvas_objects = []
-    #     if not small_count:
-    #         self.canvas_textbox.add_to_canvas(self.available_size, self.interivew_page, self.center_screen_offset, self.next)
-    #         return
-    #     if small_count < 1:
-    #         raise Exception("Must have at least one user option")
-    #     self.canvas_user_options_textboxes = []
-    #     for i in range(small_count):
-    #         print(i)
-    #         if i >= len(self.canvas_user_options_textboxes):
-    #             print("adding textbox")
-    #             self.canvas_user_options_textboxes.append(Textbox("Picture1Small.png"))
-    #         print("adding to canvas")
-    #         self.canvas_user_options_textboxes[i].add_to_canvas(self.available_size, self.interivew_page, self.center_screen_offset, lambda i = i: self.next(str(i+1)), shrink_factor= 4, count=i)
-
-    # def _resize_widgets(self, event):
-    #     if self.dont_change_size:
-    #         return
-    #     width = self.winfo_width()
-    #     height = self.winfo_height()
-    #     if not self.previous_event == None and self.previous_event[0] == width and self.previous_event[1] == height:
-    #         return
-    #     print(event)
-    #     self.previous_event = (width, height)
-    #     # # if not self.previous == (width, height):
-    #     #     # self.previous = (width, height)
-    #     # self.photo.update(width * 10/10, height * 10/10)
-    #     # self.portrait.configure(image=self.photo.image)
-    #     # self.displayed_text.configure(
-    #     #     width=int(self.winfo_width()/15), 
-    #     #     height=int(self.winfo_height()/100), 
-    #     #     font=('Times New Roman', int(self.winfo_width()/50), 'bold'), 
-    #     # )
-    #     # self.spacer.configure(width=int((self.winfo_width() - self.portrait.winfo_width())/20))
-    #     self.screen_dimentions = Dimentions(width, height)
-    #     self.fill_canvas()
 
     def type(self, text="text"):
         self.type_called_count +=1
         my_type_called_count = self.type_called_count
         # Clear previous text
-        # self.displayed_text["text"] = ""
         self.page.update_text("Mochi", "")
-        # self.interivew_page.itemconfigure(self.canvas_textbox.text, text="")
         self.update()
         # Type out new text one character at a time.
         for i in range(len(text)+1):
             if my_type_called_count != self.type_called_count: return
-            # self.displayed_text["text"] = text[0: i]
-            # self.interivew_page.itemconfigure(self.canvas_textbox.text, text=text[0: i])
             self.page.update_text(self.character_name, text=text[0:i])
             self.update()
             time.sleep(0.05)
@@ -278,9 +215,6 @@ class Window(tk.Tk):
         DEBUG = True
 
         if DEBUG and user_action: print(f"! A USER ACTION WAS GIVEN !\n   {user_action}")
-        # if not self.available_size:
-        #     self.fill_canvas()
-        #     self.dont_change_size = False
         current_actions : dict = self.code.next_line(user_input = user_action)
         if DEBUG: print(current_actions)
         if (current_actions == Status.PAUSED): return
@@ -291,44 +225,15 @@ class Window(tk.Tk):
             self.character_name = current_actions["character_name_changes"]
         if "character_portrait_changes" in keys:
             character_mood : str = current_actions["character_portrait_changes"]
-            # temp = (self.portrait.image.width(), self.portrait.image.height())
-            # self.portrait.load_portrait(character_mood)
-            # self.portrait.update(temp[0], temp[1])
-            # # self.portrait.configure(image=self.photo.image)
-            # # self.portrait.image = self.photo.image
-            # self.interivew_page.itemconfigure(self.portrait_spot, image = self.portrait.image)
             self.page.update_portrait(character_mood)
         if "user_options" in keys:
             user_options : list[str] = current_actions["user_options"]
-            # if len(user_options) > len(self.canvas_user_options_textboxes):
-            #     self._create_canvas(small_count=len(user_options))
-            # for i in range(len(self.canvas_user_options_textboxes)):
-            #     if i < len(user_options):
-            #         self.canvas_user_options_textboxes[i].show(canvas=self.interivew_page)
-            #         self.canvas_user_options_textboxes[i].update_text(canvas=self.interivew_page, text=user_options[i])
-            #     else:
-            #         self.canvas_user_options_textboxes[i].hide(canvas=self.interivew_page)
-            # # self.create_player_dialogue_frame(current_actions["user_options"])
             self.page.update_options(user_options)
             self.page.switch_to_options()
-        # else:
-        #     for a in self.canvas_user_options_textboxes:
-        #         a.hide(canvas=self.interivew_page)
         if "character_speaks" in keys:
-            # self.canvas_textbox.show(canvas=self.interivew_page)
-            # self.Type(current_actions["character_speaks"])
             self.page.switch_to_character_speaking()
             self.type(text=current_actions["character_speaks"])
-        # else:
-        #     self.canvas_textbox.hide(canvas=self.interivew_page)
         if "Note" in keys:
-            # self.interivew_page.delete("all")
-            # self.interivew_page.create_text(
-            #     self.winfo_width()/2,
-            #     self.winfo_height()/2,
-            #     text=current_actions["note"],
-            #     font=('Times New Roman', int(self.winfo_width() * 3/100), 'normal'),
-            # )
             self.page.pack_forget()
             self.page = BlankPage(parent=self)
 
@@ -764,11 +669,6 @@ class TextWidget(Widget):
         if not self.is_visible(): return
 
         self.update_font()
-        # widget_size : Dimentions = self.get_size()
-        # screen : Dimentions = self.canvas.get_size()
-        # self.position.relative_to = AllowedSpace(dimensions=screen)
-        
-        # self.canvas.moveto(self.id, screen.width/2 - widget_size.width/2, screen.height/2 - widget_size.height/2)
 
 
 class DebugWidget(Widget):
@@ -969,7 +869,6 @@ class InterviewPage(Page):
             position=Position(positioned=Positioned.INSIDE, x__percent_offset_from_left=1/15, y__percent_offset_from_top=1/5),
             relative_to=self.small_textboxes[i],
             alignment=Alignment.TOPLEFT,
-            # padding=Padding(top__percent=0.5, left__percent=0.5),
         ))
 
     def update_options(self, options : list[str]) -> None:
@@ -995,7 +894,6 @@ class InterviewPage(Page):
                     position=Position(positioned=Positioned.INSIDE, x__percent_offset_from_left=1/15, y__percent_offset_from_top=1/5),
                     relative_to=self.small_textboxes[0],
                     alignment=Alignment.TOPLEFT,
-                    # padding=Padding(top__percent=0.5, left__percent=0.5),
                 )] + self.texts
                 self.widget_added()
             elif len(options) < len(self.small_textboxes):
