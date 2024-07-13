@@ -13,11 +13,12 @@ def flatten_text(*text):
         content += str(text[i])
     return content
 
-def print_character_dialogue(*text, mood = None, character_name = None):
+def print_character_dialogue(*text, mood = None, name = None):
     global lines_since_character
     global character_mood
+    global character_name
     if mood: character_mood = mood
-    if character_name: character_name = character_name
+    if name: character_name = name
     if lines_since_character != 0:
         print(f"\n{character_name} ({character_mood}):")
     print(f" {flatten_text(*text)}")
