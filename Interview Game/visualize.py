@@ -212,7 +212,7 @@ class Window(tk.Tk):
 
 
     def next(self, user_action = None):
-        DEBUG = True
+        DEBUG = False
 
         if DEBUG and user_action: print(f"! A USER ACTION WAS GIVEN !\n   {user_action}")
         current_actions : dict = self.code.next_line(user_input = user_action)
