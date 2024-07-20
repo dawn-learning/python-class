@@ -215,7 +215,7 @@ class Dragon(characters):
 def clear_screen():
     system("cls || clear")
 
-def print_screen(enemies : characters = None, hero = Hero(), screen_clear : bool = True, disable_animations : bool = True):
+def print_screen(enemies : characters = Snake(), hero = Hero(), screen_clear : bool = True, disable_animations : bool = True):
     global last_enemies_input
     trigger_intro_animation = last_enemies_input != enemies and enemies != None and not disable_animations
     last_enemies_input = enemies
