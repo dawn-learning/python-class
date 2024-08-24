@@ -5,7 +5,7 @@ import tkinter as tk
 import time
 import io
 from enum import Enum
-from code import load_code, Status
+from codeparser import load_code, Status
 
 global character_mood
 character_mood = "normal"
