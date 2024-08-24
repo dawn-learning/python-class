@@ -4,18 +4,7 @@ This GitHub repository contains thorough notes, code snippets to copy and paste,
 ## The class
 Learn the basics of Python through Game Design! Over the course of the three classes, you will be given the tools needed to build a simple visual novel detective game and the fundamentals needed to make more complex games.
 
-### Part 1:
-We plan to cover variables, Boolean Logic, if else, and loops.
-
-### Part 2:
-We plan to cover importing, classes, functions, and OOP.
-
-### Part 3:
-We plan to cover how to add visuals using Tkinter.
-
-## Setup steps for the class
-How to setup for the Python programming class on a computer that has never run Python before.
-
+## Downloading Python and VS Code
 1. Download and install Visual Studio Code from https://code.visualstudio.com/Download.
 2. Open Visual Studio Code.
 3. Select the "dark high contrast" setting if it appears.
@@ -34,3 +23,7 @@ How to setup for the Python programming class on a computer that has never run P
 16. Type "print("hi")" into the file.
 17. Click the play button in the upper right corner.
 18. In the new bar at the bottom that appears there should be three lines. The middle one should say "hi".
+
+## Other resources
+https://www.w3schools.com/python/
+https://www.codecademy.com/learn/learn-python-3
