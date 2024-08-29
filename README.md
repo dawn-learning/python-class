@@ -3,7 +3,17 @@ Learn the basics of Python through Game Design! Over the course of the three cla
 
 This GitHub repository contains thorough notes, code snippets to copy and paste, and the completed project as a preview.
 
-![Downloads Bar](https://github.com/user-attachments/assets/cf1ba194-8eb8-4041-a55d-dce9db52de71)
+Class 1:
+  1. [Printing](https://github.com/JarodSGilliam/LibraryLearning/blob/main/Part%201/1.%20Printing.md)
+  2. [User Input](https://github.com/JarodSGilliam/LibraryLearning/blob/main/Part%201/2.%20User%20Input.md)
+
+Class 2:
+
+
+
+![Download Bar 1](https://github.com/user-attachments/assets/87442f7b-da6f-4f41-9c98-f58ca256f123)
+
+
 ## Python and VS Code at home
 1. Download and install Visual Studio Code from https://code.visualstudio.com/Download.
 2. Open Visual Studio Code.
