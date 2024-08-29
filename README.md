@@ -1,10 +1,10 @@
-# Python Programming Parts 1-3 at the Athens Library
-This GitHub repository contains thorough notes, code snippets to copy and paste, and the completed project as a preview.
-
-## The class
+![Title Bar](https://github.com/user-attachments/assets/f8d6e47b-dd6c-4339-a150-19eb535aceb4)
 Learn the basics of Python through Game Design! Over the course of the three classes, you will be given the tools needed to build a simple visual novel detective game and the fundamentals needed to make more complex games.
 
-## Downloading Python and VS Code
+This GitHub repository contains thorough notes, code snippets to copy and paste, and the completed project as a preview.
+
+![Downloads Bar](https://github.com/user-attachments/assets/cf1ba194-8eb8-4041-a55d-dce9db52de71)
+## Python and VS Code at home
 1. Download and install Visual Studio Code from https://code.visualstudio.com/Download.
 2. Open Visual Studio Code.
 3. Select the "dark high contrast" setting if it appears.
