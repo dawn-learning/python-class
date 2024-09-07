@@ -10,6 +10,8 @@ from charms import *
 from artwork import *
 from status_effects import *
 from tester import wait_for_character_input
+from characters import *
+import status_effects
 
 
 pixel_only = '▀'
@@ -19,7 +21,10 @@ top_and_bottom_pixels = '\033[38;2;{};{};{}m\033[48;2;{};{};{}m▀'
 character_and_pixel = "\033[38;2;{};{};{}m\033[48;2;{};{};{}m{}"
 line_end = "\033[0m"
 
-update_images(DEBUG=True)
+player_inventory = []
+
+# player_inventory = [Win()]
+# update_images(DEBUG=True)
 
 class Screen:
     def __init__(self, layers = [], size_x : int | None = None, size_y : int | None = None) -> None:
@@ -529,7 +534,6 @@ class Dragon(characters):
         # return []
 
 
-from characters import *
 
 
 
@@ -724,20 +728,6 @@ def find_pos_in_list(enemies, heros, turn_counter, options, selected):
             return i
 
 def get_target(enemies, heros, turn_counter, options, heros_or_villians) -> BasicCharacter | None:
-    # selected = 0
-    # while True:
-    #     pos = find_pos_in_list(enemies, heros, turn_counter, options, selected)
-    #     print(pos)
-    #     print(create_battle_screen(enemies=enemies, heros=heros, selected_character=pos))
-    #     user_input = wait_for_character_input()
-    #     if user_input == "RIGHT":
-    #         if selected < len(options)-1:
-    #             selected += 1
-    #     elif user_input == "LEFT":
-    #         if selected > 0:
-    #             selected -= 1
-    #     elif user_input == "\\n":
-    #         return turn_counter[options[selected]]
     selected = 0
     character_options = heros if heros_or_villians == "Heros" else enemies
     while True:
@@ -867,7 +857,7 @@ def get_snake_enemy(scale = 1):
         name = "Snake",
         stats= CharacterStats(
             max_health=10 if scale == 1 else 45,
-            damage=5 if scale == 1 else 7,
+            damage=4 if scale == 1 else 7,
         ),
         artwork=Snake().scaleUp(scale),
         abilities=[Whack()],
@@ -1032,19 +1022,21 @@ def run_intro_dialogue(main_character : BasicCharacter):
 
 
 
-def run_outro_dialogue(main_character : BasicCharacter):
+def run_outro_dialogue(main_character : list[BasicCharacter]):
     characters = [
         BasicCharacter(
             name="King",
             artwork=load_art("King"),
             character_type="Neutral",
         ),
-        main_character
+        *main_character
     ]
+
+    adventurer_or_adventurers = "adventurer" if len(main_character) == 1 else "adventurers"
 
     display(get_chat(
         characters=characters, 
-        text="Well done adventurer!\nThe evil beasts have been defeated!",
+        text=f"Well done {adventurer_or_adventurers}!\nThe evil beasts have been defeated!",
         continue_text="Press any key"
     ))
 
@@ -1062,7 +1054,6 @@ def run_outro_dialogue(main_character : BasicCharacter):
 
     wait_for_character_input()
 
-player_inventory = []
 
 def run_recruiting_druid_dialogue(main_character):
     characters = [
@@ -1160,26 +1151,24 @@ def boxify(text : str, number : int, x_offest : int = 3):
 
 
 
-from characters import *
 # import abilities
-import status_effects
 
-test_hero = BasicCharacter(
-    name= "Wizard",
-    stats= CharacterStats(damage=3, max_health=12),
-    artwork=load_art("Wizard"),
-    character_type="Ally",
-    abilities= [Whack(), Heal(), Poison()],
-)
+# test_hero = BasicCharacter(
+#     name= "Wizard",
+#     stats= CharacterStats(damage=3, max_health=12),
+#     artwork=load_art("Wizard"),
+#     character_type="Ally",
+#     abilities= [Whack(), Heal(), Poison()],
+# )
 
-enemy = BasicCharacter(
-    name="Test Dummy",
-    stats=CharacterStats(max_health=15),
-    artwork=Scorpion().art,
-    character_type="Enemy",
-    abilities=[Whack(), Heal()],
-)
-test_hero.current_status_effects.append(status_effects.DamageBoost())
+# enemy = BasicCharacter(
+#     name="Test Dummy",
+#     stats=CharacterStats(max_health=15),
+#     artwork=Scorpion().art,
+#     character_type="Enemy",
+#     abilities=[Whack(), Heal()],
+# )
+# test_hero.current_status_effects.append(status_effects.DamageBoost())
 
 
 class TurnEngine():
@@ -1294,7 +1283,7 @@ def get_psudo_layer(character : BasicCharacter, selected : bool, stick_to_left_s
     if character.current_health <= 0:
         artwork = tint_layer(character.artwork, Color.GREY)
     elif character.skip_next_turn:
-        artwork = tint_layer(character.artwork, Color.BLUE)
+        artwork = tint_layer(character.artwork, (165, 205, 255))
     elif status_effects.Poisoned() in character.current_status_effects:
         artwork = tint_layer(character.artwork, Color.GREEN)
     else:
@@ -1322,7 +1311,7 @@ def get_psudo_layer(character : BasicCharacter, selected : bool, stick_to_left_s
     )
     return output_layer
 
-allies = [test_hero, test_hero.deepcopy()]
+# allies = [test_hero, test_hero.deepcopy()]
 
 def get_layers(character_list : list[BasicCharacter], right : bool, selected : BasicCharacter, turn : BasicCharacter, with_text : BasicCharacter = None, text : str = None):
     layers = []
@@ -1335,7 +1324,7 @@ def get_layers(character_list : list[BasicCharacter], right : bool, selected : B
     return layers
 
 
-enemies = [enemy, enemy.deepcopy()]
+# enemies = [enemy, enemy.deepcopy()]
 
 def manufacture_layer(allies : list[BasicCharacter], enemies : list[BasicCharacter], turn : BasicCharacter, selected = None, damage_done = None, damage_target = None, show_abilities : bool = True):
     allies = [a for a in allies.__reversed__()]
@@ -1506,7 +1495,10 @@ def run_conflict(heros : list[BasicCharacter] = [], enemies : list[BasicCharacte
             b.on_cooldown = 0
 
     # Returns True if the characters that are still standing (when all the not elimated characters are on one team) are on the hero's side
-    return turn_engine.next_up().character_type == "Ally"
+    for a in heros:
+        if a.current_health > 0:
+            return True
+    return False
 
 
 
@@ -1575,6 +1567,8 @@ def get_ability_change_screen(heros):
                 player_inventory.append(ability)
             else:
                 item = get_inventory_item()
+                if item == None:
+                    continue
                 player_inventory.remove(item)
                 heros[y].abilities.append(item)
         elif user_input == "1":
@@ -1585,6 +1579,9 @@ def get_ability_change_screen(heros):
 
 
 def get_inventory_item():
+    if len(player_inventory) == 0:
+        return None
+
     x = 0
     y = 0
     selected = None
@@ -1704,7 +1701,7 @@ def run_game(DEBUG = False):
             # Check to see if in castle
             if castle.in_area(player_x, player_y):
                 # Win game
-                run_outro_dialogue(party[0])
+                run_outro_dialogue(party)
                 quit()
 
         # Checks if player is on boss encounter location
@@ -1780,9 +1777,11 @@ def run_game(DEBUG = False):
                         member.full_heal()
 
                     # DROPS
-                    random_drop = randint(0, 0)
+                    random_drop = randint(0, 1)
                     if random_drop == 0:
                         charm = DamageBoost() if enemy_type == "Scorpion" else Freeze() if enemy_type == "Dragon" else Poison()
+                        if charm in player_inventory:
+                            continue
                         display(get_drops_screen(charm))
                         wait_for_character_input()
                         player_inventory.append(charm)

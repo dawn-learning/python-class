@@ -71,7 +71,7 @@ class DamageBoost(Effect):
 
 class HealBoost(Effect):
     def __init__(self) -> None:
-        super().__init__("Strength Boost", "Increases healing done by 1.5", 2)
+        super().__init__("Heal Boost", "Increases healing done by 1.5", 2)
 
 class Poisoned(Effect):
     def __init__(self) -> None:

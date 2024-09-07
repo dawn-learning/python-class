@@ -97,7 +97,7 @@ def get_text_as_pixels_big(text):
     return text
 
 def update_images(DEBUG : bool = False):
-    for image in ["Alphabet", "Whack", "Heal", "Encounter_Map", "Poison", "Freeze"]:
+    for image in ["Alphabet", "Power_Charm", "Whack", "Heal", "Encounter_Map", "Poison", "Freeze"]:
         update_image(image, DEBUG)
 
 def tint_layer(pixels : list[list], color : Color | tuple, amount : float = 0.5) -> list[list]:
