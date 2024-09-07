@@ -6,8 +6,21 @@ This GitHub repository contains thorough notes, code snippets to copy and paste,
 Class 1:
   1. [Printing](https://github.com/JarodSGilliam/LibraryLearning/blob/main/Part%201/1.%20Printing.md)
   2. [User Input](https://github.com/JarodSGilliam/LibraryLearning/blob/main/Part%201/2.%20User%20Input.md)
+  3. [Variables](https://github.com/JarodSGilliam/LibraryLearning/blob/main/Part%201/3.%20Variables.md)
+  4. [Conditionals](https://github.com/JarodSGilliam/LibraryLearning/blob/main/Part%201/4.%20Conditionals.md)
+  5. [Importing](https://github.com/JarodSGilliam/LibraryLearning/blob/main/Part%201/5.%20Importing.md)
+
 
 Class 2:
+  1. [Types](https://github.com/JarodSGilliam/LibraryLearning/blob/main/Part%201/1.%20Types.md)
+  2. [Functions](https://github.com/JarodSGilliam/LibraryLearning/blob/main/Part%201/2.%20Functions.md)
+  3. [Loops](https://github.com/JarodSGilliam/LibraryLearning/blob/main/Part%201/3.%20Loops.md)
+
+
+Class 3:
+  1. [Classes](https://github.com/JarodSGilliam/LibraryLearning/blob/main/Part%201/1.%20Classes.md)
+  2. [OOP](https://github.com/JarodSGilliam/LibraryLearning/blob/main/Part%201/2.%20User%20OOP.md)
+  3. [Text Files](https://github.com/JarodSGilliam/LibraryLearning/blob/main/Part%201/3.%20Text%20Files.md)
 
 
 
