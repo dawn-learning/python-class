@@ -1,161 +1,25 @@
-from enum import Enum
-from charms import *
-
-class Color(Enum):
-    RED = (255, 0, 0)
-    GREEN = (0, 255, 0)
-    BLUE = (0, 0, 255)
-    WHITE = (255, 255, 255)
-    # OFFWHITE = (215, 215, 215)
-    OFFWHITE = (255, 238, 211)
-    BLACK = (0, 0, 0)
-    YELLOW = (255, 255, 0)
-    PINK = (255, 25, 150)
-    PURPLE = (255, 0, 255)
-    BROWN = (160, 80, 45)
-    GREY = (150, 150, 150)
-
-    def __mul__(self, other):
-        return [self for _ in range(other)]
-
-    def __rmul__(self, other):
-        return [self for _ in range(other)]
-
-# # class Colorized:
-# #     def __init__(
-# #             self, 
-# #             text : str = "", 
-# #             text_color : Color | None = None, 
-# #             background_color : Color | None = None,
-# #         ) -> None:
-# #         self._text = text
-# #         self._text_color : Color | None = text_color
-# #         self._background_color : Color | None = background_color
-
-# #         self.__str = ""
-# #         self._update_str()
-
-# #     def _update_str(self):
-# #         text = self._text
-# #         if self._text_color != None:
-# #             r, g, b = self._text_color.value
-# #             text = f"\033[38;2;{r};{g};{b}m" + text
-# #         if self._background_color != None:
-# #             r, g, b = self._background_color.value
-# #             text = f"\033[48;2;{r};{g};{b}m" + text
-# #         if self._text_color != None or self._background_color != None:
-# #             text += "\033[0m"
-# #         self.__str = text
-
-# #     def update(
-# #             self, 
-# #             text : str = None, 
-# #             text_color : Color | None = "", 
-# #             background_color : Color | None = ""
-# #         ):
-# #         if text != None:
-# #             self._text = text
-# #         if text_color != "":
-# #             self._text_color = text_color
-# #         if background_color != "":
-# #             self._background_color = background_color
-# #         self._update_str()
-
-# #     def __str__(self) -> str:
-# #         return self.__str
-
-# #     def merge(given_array : list):
-# #         pass
-
-# #     def __add__(self, other):
-# #         if type(other) == Colorized:
-# #             if other._background_color == self._background_color and other._text_color == self._text_color:
-# #                 self._text += other._text
-# #                 return self
-# #         return self.__str + str(other)
-
-# #     def __radd__(self, other):
-# #         if type(other) == Colorized:
-# #             if other._background_color == self._background_color and other._text_color == self._text_color:
-# #                 self._text = other._text + self._text
-# #                 return self
-# #         return str(other) + self.__str
-
-# # class ColorizedText:
-# #     def __init__(self, text : list[Colorized | str] = []) -> None:
-# #         self._text = text
-
-# #     def _to_dict(text, text_color, background_color):
-# #         return {
-# #             "text": text, 
-# #             "text_color": text_color, 
-# #             "background_color" : background_color,
-# #         }
-
-# #     def _convert_other_to_entry(other):
-# #         if type(other) == str:
-# #             other = ColorizedText._to_dict(other, None, None)
-# #         if type(other) == Colorized:
-# #             other = ColorizedText._to_dict(other._text, other._text_color, other._background_color)
-# #         if type(other) == list:
-# #             if len(other) == 1:
-# #                 other = ColorizedText._to_dict(other[0], None, None)
-# #             elif len(other) == 2:
-# #                 other = ColorizedText._to_dict(other[0], other[1], None)
-# #             elif len(other) == 3:
-# #                 other = ColorizedText._to_dict(other[0], other[1], other[2])
-# #             else:
-# #                 raise Exception(f"other can only be of length 3 or less was {len(other)} long, other is {other}")
-# #         return other
-
-# #     def __add__(self, other):
-# #         self._text.append(ColorizedText._convert_other_to_entry(other))
-
-# #     def __radd__(self, other):
-# #         self._text.insert(0, ColorizedText._convert_other_to_entry(other))
-
-# #     def __str__(self):
-# #         print("a")
-
-
-# # class Layer:
-# #     def __init__(self, width, height, background = Colorized("██", Color.RED)) -> None:
-# #         self.layer = [[background for _ in range(width)] for _ in range(height)]
-
-# #     def __str__(self) -> str:
-# #         output = ""
-# #         for row in self.layer:
-# #             temp = Colorized()
-# #             for item in row:
-# #                 temp += item
-# #             output += temp + "\n"
-# #             # repr()
-# #         if len(output) > 1:
-# #             return output[:len(output)-1]
-# #         return output
-
-# # class Screen:
-# #     def __init__(self, layers : list[Layer]) -> None:
-# #         self.layers = layers
-
-# #     def __str__(self) -> str:
-# #         width = len(self.layers[0].layer[0])
-# #         height = len(self.layers[0].layer)
-# #         spots = []
-# #         for row in range(height):
-# #             for column in range(width):
-# #                 spots.append((column, row))
-# #         for a in 
-# #         print(spots)
-
-# # l = Screen([Layer(10, 10, None), Layer(10, 10)])
-
-# # print(l)
-
-
-
-
+# Imports from existing packages
 from math import ceil
+from os import system
+from enum import Enum
+from time import sleep
+from random import randint, choice
+
+# Imports from my other files
+from charms import *
+from artwork import *
+from status_effects import *
+from tester import wait_for_character_input
+
+
+pixel_only = '▀'
+top_pixel_only = '\033[38;2;{};{};{}m▀'
+bottom_pixel_only ='\033[48;2;{};{};{}m▀'
+top_and_bottom_pixels = '\033[38;2;{};{};{}m\033[48;2;{};{};{}m▀'
+character_and_pixel = "\033[38;2;{};{};{}m\033[48;2;{};{};{}m{}"
+line_end = "\033[0m"
+
+update_images(DEBUG=True)
 
 class Screen:
     def __init__(self, layers = [], size_x : int | None = None, size_y : int | None = None) -> None:
@@ -398,102 +262,6 @@ class TextLayer(Layer):
 
 
 
-pixel_only = '▀'
-top_pixel_only = '\033[38;2;{};{};{}m▀'
-bottom_pixel_only ='\033[48;2;{};{};{}m▀'
-top_and_bottom_pixels = '\033[38;2;{};{};{}m\033[48;2;{};{};{}m▀'
-character_and_pixel = "\033[38;2;{};{};{}m\033[48;2;{};{};{}m{}"
-line_end = "\033[0m"
-# print(color_code.format(*, *))
-
-from random import randint, choice
-
-# pixels = []
-# for i in range(25):
-#     r = randint(0, 2)
-#     if r != 0:
-#         r = 1 if randint(0, 3) != 0 else None
-#         if not r:
-#             r = 2 if randint(0, 3) != 0 else 3
-#     pixels.append(Color.BLACK * r + Color.WHITE * (25-r))
-
-
-
-
-# pixels = PixelLayer(pixels=pixels)
-
-# print(pixels)
-
-def get_edge_freying_pattern():
-    depth_array = []
-    depth = 0
-    same_count = 0
-    for a in range(25):
-        prob = 2 if same_count < 3 else 3 if same_count < 5 else 5
-        if randint(0, prob) != 0:
-            same_count = 0
-            if randint(0, 2) == 0:
-                if depth > 0:
-                    depth -= 1
-            else:
-                if depth < 3:
-                    depth += 1
-        else:
-            same_count += 1
-        depth_array.append(depth)
-    return depth_array
-
-
-def get_edge_freying_pattern():
-    edge_lengths = []
-    direction = "DOWN"
-    offest = randint(0, 3)
-    total = 0
-    max = 35
-
-    while total < max:
-        count = choice([1, 1, 1, 2, 2, 2, 2, 2, 2, 3, 3, 4])
-        if total + count > max:
-            count = max - total
-        for _ in range(count):
-            edge_lengths.append(offest)
-        total += count
-        if direction == "DOWN":
-            if offest == 3:
-                direction = "UP"
-                offest -= 1
-            else:
-                offest += 1
-        else:
-            if offest == 0:
-                direction = "DOWN"
-                offest += 1
-            else:
-                offest -= 1
-    return edge_lengths
-
-
-# for i in edge_lengths:
-#     print("x" * i)
-
-
-# import math
-
-
-# l = PixelLayer(pixels=[
-#     [Color.PURPLE if randint(0, int(math.sqrt((35/2 - column) * (35/2 - column) + (35/2 - row) * (35/2 - row))/5)) == 0 else None for column in range(35)] for row in range(35)
-# ])
-
-
-# pixels = []
-# for a in get_edge_freying_pattern():
-#     pixels.append([None for _ in range(a)] + Color.BROWN * (25-a))
-
-# pixels = PixelLayer(pixels=pixels, x = 5, y = 5)
-
-# # print(pixels)
-# # print(l)
-
 
 # s = Screen(layers=[pixels, l])
 
@@ -567,8 +335,6 @@ def wrap_map(map):
     ]
 
 
-from os import system
-from time import sleep
 
 def clear_screen():
     system("cls | clear")
@@ -724,7 +490,6 @@ class Scorpion(characters):
                 new_art.insert(0, "🤍" * len(self.art[0]))
         return new_art
 
-
 class Dragon(characters):
     def __init__(self, small = False) -> None:
         self.type = "Water"
@@ -763,121 +528,8 @@ class Dragon(characters):
         return new_art
         # return []
 
-health = 10
-l = get_health_bar(health=health, max_health=10)
 
-# print(l)
-
-
-# print(PixelLayer(pixels=Hero().art))
-
-
-eye_color = Color.PURPLE
-
-male = [None] + Color.OFFWHITE * 7 + [None, None]
-female = [None, None] + Color.OFFWHITE * 5 + [None, None]
-
-
-from status_effects import *
-
-global unique_id
-unique_id = 0
-
-class BasicCharacter:
-    def __init__(self, name, current_health, max_health, artwork, base_damage = 2, base_healing = 0, character_type = "Enemy") -> None:
-        self.name = name
-        self.current_health = current_health
-        self.max_health = max_health
-        self.artwork = artwork
-        self.current_status_effects = []
-        self.outgoing_status_effects = []
-        self.base_damage = base_damage
-        self.base_healing = base_healing
-        self.character_type = character_type
-        self.default_actions = ["Attack", "Attack", "Attack", "Heal"]
-        self.healing_pattern = ["Self", "All", "Random", "Self", "Self", "All"]
-        self.charms = []
-        global unique_id
-        self.uniqueID = unique_id
-        unique_id += 1
-
-    # def __eq__(self, value: object) -> bool:
-    #     return self.uniqueID == value.uniqueID
-
-    def deepcopy(self):
-        output = BasicCharacter(
-            name=self.name,
-            current_health=self.current_health,
-            max_health=self.max_health,
-            artwork=self.artwork.copy(),
-            base_damage=self.base_damage,
-            base_healing=self.base_healing,
-            character_type=self.character_type,
-        )
-        output.current_status_effects = self.current_status_effects.copy()
-        output.outgoing_status_effects = self.outgoing_status_effects.copy()
-        output.default_actions = self.default_actions.copy()
-        output.healing_pattern = self.healing_pattern.copy()
-        output.charms = self.charms.copy()
-        return output
-
-    def height(self):
-        return len(self.artwork) + 2 + 2 + 2
-
-    def width(self):
-        max_width = -1
-        for row in self.artwork:
-            if len(row) > max_width:
-                max_width = len(row)
-        if len(self.name) > max_width:
-            max_width = len(self.name)
-        if self.max_health > max_width:
-            max_width = self.max_health
-        return max_width
-
-    def attack(self):
-        if len(self.outgoing_status_effects) > 0:
-            outgoing_status_effect = self.outgoing_status_effects.pop(0)
-            self.outgoing_status_effects.append(outgoing_status_effect)
-        else:
-            outgoing_status_effect = None
-        return (self.base_damage, outgoing_status_effect)
-
-    def take_damage(self, damage):
-        self.current_health -= damage
-        if self.current_health < 0:
-            self.current_health = 0
-
-    def take_healing(self, healing):
-        self.current_health += healing
-        if self.current_health > self.max_health:
-            self.current_health = self.max_health
-
-    def get_next_default_action(self):
-        action = self.default_actions.pop(0)
-        self.default_actions.append(action)
-        return action
-
-    def get_next_in_healing_pattern(self):
-        target = self.healing_pattern.pop(0)
-        self.healing_pattern.append(target)
-        return target
-
-    def end_turn(self):
-        for i in range(len(self.current_status_effects)):
-            effect : StatusEffect = self.current_status_effects[i]
-            if type(effect) != StatusEffect:
-                raise Exception(f"status effect is not of type StatusEffect, instead is of type {type(effect)}")
-            self.current_status_effects[i].duration = effect.action(self, effect.duration, effect.level)
-        def remove_completed_status_effects():
-            i = 0
-            while i < len(self.current_status_effects):
-                if self.current_status_effects[i].duration == None:
-                    self.current_status_effects.pop(i)
-                    continue
-                i += 1
-        remove_completed_status_effects()
-
+from characters import *
 
 
 
@@ -890,7 +542,7 @@ def get_character_display(basic_character : BasicCharacter, selected : bool):
     output = [
         PixelLayer(pixels = basic_character.artwork, x = get_offset(basic_character.artwork[0]), y=arrow_offset),
         TextLayer(basic_character.name, x = get_offset(basic_character.name), y = len(basic_character.artwork) + 2 + arrow_offset), 
-        get_health_bar(health=basic_character.current_health, max_health=basic_character.max_health).set_pos(y=2 + len(basic_character.artwork) + 2 + arrow_offset, x = get_offset(basic_character.max_health)),
+        get_health_bar(health=basic_character.current_health, max_health=basic_character.stats.max_health).set_pos(y=2 + len(basic_character.artwork) + 2 + arrow_offset, x = get_offset(basic_character.stats.max_health)),
     ]
     if selected:
         arrow = [
@@ -903,30 +555,14 @@ def get_character_display(basic_character : BasicCharacter, selected : bool):
 
 
 
-
-# print(PixelLayer(pixels=characters._shrink_character(Snake().art)))
-
 screen_width = 83
 screen_height = 58
-background_layer = PixelLayer(pixels=[[(10, 10, 10) for _ in range(screen_width)] for _ in range(screen_height)])
+background_layer = PixelLayer(pixels=[[(10, 10, 10) for _ in range(screen_width)] for _ in range(screen_height + 8)])
 
 
-villian = BasicCharacter(name="villian", current_health=20, max_health=20, artwork=[], base_healing=2)
-hero = BasicCharacter(name="hero", current_health=20, max_health=20, artwork=[], character_type="Ally", base_healing=2)
-hero.outgoing_status_effects = [StatusEffect(name = "Burn", action = burn, duration = 3, level = 2), None, None, None, None]
-# j.current_status_effects.append([burn, 3, 2])
-# for _ in range(4):
-#     j.end_turn()
-#     print(j.current_health, j.current_status_effects)
-# j.current_status_effects.append([regen, 3, 2])
-# for _ in range(4):
-#     j.end_turn()
-#     print(j.current_health, j.current_status_effects)
-# print(j.base_damage, j.current_status_effects)
-# j.current_status_effects.append([damage_boost, False, 2])
-# for _ in range(4):
-#     j.end_turn()
-#     print(j.base_damage, j.current_status_effects)
+# villian = BasicCharacter(name="villian", current_health=20, max_health=20, artwork=[], base_healing=2)
+# hero = BasicCharacter(name="hero", current_health=20, max_health=20, artwork=[], character_type="Ally", base_healing=2)
+# hero.outgoing_status_effects = [StatusEffect(name = "Burn", action = burn, duration = 3, level = 2), None, None, None, None]
 
 
 
@@ -961,29 +597,52 @@ def get_locations_of_characters_of_type(character_type : str, turn_counter : lis
     return output
 
 def get_i_from_user_from_list_of_options(options : list):
+    layers=[]
+    for i in range(len(options)):
+        # print(f"{i+1} {options[i]}")
+        layers += [
+            TextLayer(options[i], x = 1 + 11 * i, y = 2),
+            TextLayer(str(i+1), x=10-2 + 11 * i, y=8-3),
+            PixelLayer(pixels=[
+                [None for _ in range(10)],
+                [None] + Color.BROWN * 8 + [None],
+                [Color.BROWN] + [None for _ in range(8)] + [Color.BROWN],
+                [Color.BROWN] + [None for _ in range(8)] + [Color.BROWN],
+                [Color.BROWN] + [None for _ in range(8)] + [Color.BROWN],
+                [Color.BROWN] + [None for _ in range(8)] + [Color.BROWN],
+                [None] + Color.BROWN * 8 + [None],
+                [None for _ in range(10)],
+            ], x = 11 * i),
+        ]
+    display(Screen(layers, size_x = 25), height_override=4)
     while True:
-        for i in range(len(options)):
-            print(f"{i+1} {options[i]}")
-        user_input = input()
+        user_input = wait_for_character_input()
         try:
             user_input = int(user_input)-1
+            if user_input < 0 or user_input >= len(options):
+                continue
         except:
-            print("Please input a number")
+            # print("Please input a number")
             continue
         return options[user_input]
 
 
-def get_box(size : int = 5, id : int = 1):
-    if type(size) != int:
-        raise Exception(f"size must be an int, size is a {type(size)}")
+def get_box(height : int = 5, width : int | None = None, id : int = 1):
+    if type(height) != int:
+        raise Exception(f"size must be an int, size is a {type(height)}")
     if type(id) != int:
         raise Exception(f"count must be an int, size is a {type(id)}")
+    
+    if width == None:
+        width = screen_width
+    else:
+        width += 4
 
     return PixelLayer(pixels=[
-        [None, None] + Color.BROWN * (screen_width-4) + [None, None],
-        *[[None, Color.BROWN] + [None for _ in range(screen_width-4)] + [Color.BROWN, None] for _ in range(size)],
-        [None, None] + Color.BROWN * (screen_width-4) + [None, None],
-    ], y=screen_height-(2 + size + 1) * id)
+        [None, None] + Color.BROWN * (width-4) + [None, None],
+        *[[None, Color.BROWN] + [None for _ in range(width-4)] + [Color.BROWN, None] for _ in range(height)],
+        [None, None] + Color.BROWN * (width-4) + [None, None],
+    ], y=screen_height-(2 + height + 1) * id)
 
 
 
@@ -1007,7 +666,7 @@ def get_chat(characters : list[BasicCharacter], text : str, continue_text : str)
         PixelLayer(pixels=reverse_artwork(characters[0].artwork), x = 10, y = 20),
         *[PixelLayer(pixels=characters[i+1].artwork, x=i * 10 + 50, y= 20) for i in range(len(characters[1:]))],
         *[TextLayer(text[i], y=screen_height - 12 + i*2, x=3) for i in range(len(text))],
-        get_box(size=11),
+        get_box(height=11),
         background_layer,
     ]
     if continue_text:
@@ -1023,7 +682,7 @@ def get_options(characters : list[BasicCharacter], options : list[str]):
     for i in range(len(temp_options)):
         layers.append(TextLayer(temp_options[i], y=screen_height-5 - 7*i, x= 3))
         layers.append(TextLayer(str(len(temp_options)-i), y=screen_height-4 - 7*i, x=screen_width-3))
-        layers.append(get_box(size=4, id=i+1))
+        layers.append(get_box(height=4, id=i+1))
     layers.append(background_layer)
     return Screen(layers=layers)
 
@@ -1036,9 +695,6 @@ class Area:
 
     def in_area(self, x, y):
         return (x >= self.starting_x and x <= self.ending_x) and (y >= self.starting_y and y <= self.ending_y)
-
-from tester import wait_for_character_input
-from artwork import *
 
 
 def create_battle_screen(enemies : list[BasicCharacter], heros : list[BasicCharacter], selected_character : int | None = None):
@@ -1063,7 +719,7 @@ def create_battle_screen(enemies : list[BasicCharacter], heros : list[BasicChara
 def find_pos_in_list(enemies, heros, turn_counter, options, selected):
     all_list = [*enemies, *heros]
     for i in range(len(all_list)):
-        print(f"checking {all_list[i]} vs {turn_counter[options[selected]]} is {all_list[i] == turn_counter[options[selected]]}")
+        # print(f"checking {all_list[i]} vs {turn_counter[options[selected]]} is {all_list[i] == turn_counter[options[selected]]}")
         if all_list[i] == turn_counter[options[selected]]:
             return i
 
@@ -1086,8 +742,7 @@ def get_target(enemies, heros, turn_counter, options, heros_or_villians) -> Basi
     character_options = heros if heros_or_villians == "Heros" else enemies
     while True:
         pos = selected + len(enemies) if heros_or_villians == "Heros" else selected
-        clear_screen()
-        print(create_battle_screen(enemies=enemies, heros=heros, selected_character=pos))
+        display(create_battle_screen(enemies=enemies, heros=heros, selected_character=pos))
         user_input = wait_for_character_input()
         if user_input == "RIGHT":
             if selected < len(character_options)-1:
@@ -1096,7 +751,7 @@ def get_target(enemies, heros, turn_counter, options, heros_or_villians) -> Basi
             if selected > 0:
                 selected -= 1
         elif user_input == "\\n":
-            print(len(character_options), heros_or_villians, heros_or_villians == "Heros")
+            # print(len(character_options), heros_or_villians, heros_or_villians == "Heros")
             return character_options[selected]
 
 def run_battle_engine(heros : list[BasicCharacter], enemies : list[BasicCharacter]) -> bool:
@@ -1108,8 +763,7 @@ def run_battle_engine(heros : list[BasicCharacter], enemies : list[BasicCharacte
 
     if DEBUG: print(f"both_sides_are_standing(turn_counter) is {both_sides_are_standing(turn_counter)}")
     while both_sides_are_standing(turn_counter):
-        clear_screen()
-        print(create_battle_screen(enemies=enemies, heros=heros))
+        display(create_battle_screen(enemies=enemies, heros=heros))
 
         # Get the character whose turn it is
         current_character = turn_counter.pop(0)
@@ -1197,7 +851,7 @@ def run_battle_engine(heros : list[BasicCharacter], enemies : list[BasicCharacte
             for a in turn_counter:
                 print(a.name, a.current_health)
     if DEBUG: print("-" * 10)
-    print(create_battle_screen(enemies=enemies, heros=heros))
+    display(create_battle_screen(enemies=enemies, heros=heros))
     sleep(0.5)
 
     heros_cumulative_health, enemies_cumulative_health = get_cumulative_healths(turn_counter)
@@ -1211,58 +865,37 @@ def run_battle_engine(heros : list[BasicCharacter], enemies : list[BasicCharacte
 def get_snake_enemy(scale = 1):
     return BasicCharacter(
         name = "Snake",
-        current_health=10 if scale == 1 else 40,
-        max_health=10 if scale == 1 else 40,
+        stats= CharacterStats(
+            max_health=10 if scale == 1 else 45,
+            damage=5 if scale == 1 else 7,
+        ),
         artwork=Snake().scaleUp(scale),
-        base_damage=1 if scale == 1 else 2,
+        abilities=[Whack()],
     )
 
 def get_dragon_enemy(scale = 1):
     return BasicCharacter(
         name="Dragon",
-        current_health=8 if scale == 1 else 35,
-        max_health=8 if scale == 1 else 35,
+        stats= CharacterStats(
+            max_health=8 if scale == 1 else 35,
+            damage=3 if scale == 1 else 6,
+        ),
         artwork=Dragon().scaleUp(scale),
-        base_damage=1 if scale == 1 else 2,
+        abilities=[Whack()],
     )
 
 def get_scorpion_enemy(scale = 1):
-    return BasicCharacter(
+    output = BasicCharacter(
         name="Scorpion",
-        current_health=5 if scale == 1 else 19,
-        max_health=5 if scale == 1 else 30,
+        stats= CharacterStats(
+            max_health=5 if scale == 1 else 25,
+            damage=1 if scale == 1 else 2,
+        ),
         artwork=Scorpion().scaleUp(scale),
-        base_damage=1 if scale == 1 else 2,
+        abilities=[Whack()],
     )
-
-# enemies = [enemy, enemy.deepcopy()]
-
-
-# party = [
-#     BasicCharacter(
-#         name= "James",
-#         current_health=10,
-#         max_health=10,
-#         artwork=example_artwork,
-#         character_type="Ally",
-#     ),
-#     BasicCharacter(
-#         name= "Jeoffry",
-#         current_health=10,
-#         max_health=10,
-#         artwork=example_artwork,
-#         character_type="Ally",
-#     ),
-#     # BasicCharacter(
-#     #     name= "Jeorge",
-#     #     current_health=10,
-#     #     max_health=10,
-#     #     artwork=example_artwork,
-#     #     character_type="Ally",
-#     # )
-# ]
-
-# run_battle_engine(heros=party, enemies=enemies)
+    if scale != 1: output.current_health = 15
+    return output
 
 
 
@@ -1323,7 +956,7 @@ def get_victory_screen():
         PixelLayer(victory_text, x=screen_center(victory_text[0], horizontal=True), y=int((screen_height - len(victory_text)-16)/2)),
         TextLayer("Health restored!", x = screen_center("Health restored!", horizontal=True), y=screen_center(1, vertical=True)-2),
         TextLayer(continue_text, x = screen_width-len(continue_text) - 3, y=screen_height-3),
-        PixelLayer(pixels=[[(100, 100, 100) for _ in range(screen_width)] for _ in range(screen_height)])
+        background_layer,
     ])
 
 def get_defeat_screen():
@@ -1336,16 +969,20 @@ def get_defeat_screen():
         TextLayer(text1, x = screen_center(text1, horizontal=True), y=screen_center(1, vertical=True)-2),
         TextLayer(text2, x = screen_center(text2, horizontal=True), y=screen_center(1, vertical=True)),
         TextLayer(continue_text, x = screen_width-len(continue_text) - 3, y=screen_height-3),
-        PixelLayer(pixels=[[(100, 100, 100) for _ in range(screen_width)] for _ in range(screen_height)])
+        background_layer,
     ])
 
 def get_drops_screen(charm : FunctionalCharms | Charms):
+    if charm == None:
+        raise Exception("ERROR! charm was none")
+    drops_text : str = "The monster dropped a new ability:"
     if type(charm) == Charms:
         charm = FunctionalCharms(charm)
     art = charm.artwork
     description : list[str] = prevent_text_overflow(charm.description)
     continue_text = "Press any key"
     return Screen(layers=[
+        TextLayer(drops_text, x=screen_center(drops_text, horizontal=True), y=2),
         PixelLayer(art, x=screen_center(art[0], horizontal=True), y=screen_center(art, vertical=True) - int(len(art)/2)),
         TextLayer(charm.name, x=screen_center(charm.name, horizontal=True), y=screen_center(1, vertical=True) + 2),
         *[TextLayer(description[i], x=screen_center(description[i], horizontal=True), y=screen_center(1, vertical=True) + 6 + 2*i) for i in range(len(description))],
@@ -1358,40 +995,33 @@ def run_intro_dialogue(main_character : BasicCharacter):
     characters = [
         BasicCharacter(
             name="King",
-            current_health=20,
-            max_health=20,
             artwork=load_art("King"),
             character_type="Neutral",
         ),
         main_character
     ]
 
-    clear_screen()
-    print(get_chat(
+    display(get_chat(
         characters=characters, 
         text="Hello adventurer!\nEvil beasts have taken over this land.\nEliminate the three strongest and the rest will leave.\nWill you help me?",
         continue_text="Press any key"
     ))
     wait_for_character_input()
 
-    clear_screen()
     options = ["Yes", "No"]
-    print(get_options(characters=characters, options=options))
+    display(get_options(characters=characters, options=options))
 
     user_input = get_number_selection_from_options(options)
 
     if user_input == 1:
-        clear_screen()
-        print(get_chat(
+        display(get_chat(
             characters=characters, 
             text="Oh.\nOk.\nBye then.",
             continue_text="Press any key"
         ))
-        clear_screen()
         quit()
 
-    clear_screen()
-    print(get_chat(
+    display(get_chat(
         characters=characters, 
         text="Good luck adventurer!\nDefeat the three beasts and then return here to claim your prize!",
         continue_text="Press any key"
@@ -1406,24 +1036,25 @@ def run_outro_dialogue(main_character : BasicCharacter):
     characters = [
         BasicCharacter(
             name="King",
-            current_health=20,
-            max_health=20,
             artwork=load_art("King"),
             character_type="Neutral",
         ),
         main_character
     ]
 
-    clear_screen()
-    print(get_chat(
+    display(get_chat(
         characters=characters, 
         text="Well done adventurer!\nThe evil beasts have been defeated!",
         continue_text="Press any key"
     ))
-    wait_for_character_input()
 
-    clear_screen()
-    print(get_chat(
+    input = None
+    while not input:
+        input = wait_for_character_input()
+        if input == "UP" or input == "LEFT" or input == "RIGHT" or input == "DOWN":
+            input = None
+
+    display(get_chat(
         characters=characters, 
         text="Here's a bunch of gold for completing your quest!\n THANKS FOR PLAYING!",
         continue_text="Press any key"
@@ -1431,19 +1062,590 @@ def run_outro_dialogue(main_character : BasicCharacter):
 
     wait_for_character_input()
 
+player_inventory = []
+
+def run_recruiting_druid_dialogue(main_character):
+    characters = [
+        BasicCharacter(
+            name="Druid",
+            artwork=load_art("Druid"),
+            character_type="Neutral",
+        ),
+        main_character
+    ]
+
+    display(get_chat(
+        characters=characters, 
+        text="Great job with that giant scorpion!\nI tried, myself, but it was too tough for me.",
+        continue_text="Press any key"
+    ))
+    wait_for_character_input()
+
+    options = ["Thanks!", "Go way, I have work to do."]
+    display(get_options(characters=characters, options=options))
+
+    user_input = get_number_selection_from_options(options)
+
+    if user_input == 1:
+        display(get_chat(
+            characters=characters, 
+            text="Fair enough.\nGood luck with the others",
+            continue_text="Press any key"
+        ))
+        wait_for_character_input()
+        return False
+
+    display(get_chat(
+        characters=characters, 
+        text="You're welcome!\nCould you use a hand with the other monsters?\nI'm not that good at whacking 'em, but I can keep you alive pretty well.",
+        continue_text="Press any key"
+    ))
+    wait_for_character_input()
+
+    options = ["Sure!", "Nah, I'm good."]
+    display(get_options(characters=characters, options=options))
+
+    user_input = get_number_selection_from_options(options)
+
+    if user_input == 0:
+        display(get_chat(
+            characters=characters, 
+            text="Sweet!\nLets go!",
+            continue_text="Press any key"
+        ))
+        wait_for_character_input()
+        return True
+    else:
+        display(get_chat(
+            characters=characters, 
+            text="Ok.\nGood luck!",
+            continue_text="Press any key"
+        ))
+        print(user_input)
+        wait_for_character_input()
+        return False
+
+
+
+def display(screen : Screen, width_override : int = None, height_override : int = None):
+    width = screen_width if width_override == None else width_override
+    height = screen_height if height_override == None else height_override
+    print(f"\u001b[{width}D" + f"\u001b[{height}A" + str(screen))
+
+def boxify(text : str, number : int, x_offest : int = 3):
+    return [
+        TextLayer(text, x = x_offest, y = screen_height + 3),
+        TextLayer(str(number), x = x_offest + len(text) + 3, y = screen_height + 4),
+        get_box(height=5, width=len(text) + 5).set_pos(x= x_offest-3, y = screen_height),
+    ]
+
+
+
+
+
+
+
+
+
+
+
+# print(PixelLayer(get_text_as_pixels_big("YOU WON")))
+
+
+# layer = PixelLayer(load_art("Druid"))
+
+
+# print(layer)
+# print(PixelLayer(tint_layer(layer.pixel_array, Color.GREEN)))
+
+
+
+from characters import *
+# import abilities
+import status_effects
+
+test_hero = BasicCharacter(
+    name= "Wizard",
+    stats= CharacterStats(damage=3, max_health=12),
+    artwork=load_art("Wizard"),
+    character_type="Ally",
+    abilities= [Whack(), Heal(), Poison()],
+)
+
+enemy = BasicCharacter(
+    name="Test Dummy",
+    stats=CharacterStats(max_health=15),
+    artwork=Scorpion().art,
+    character_type="Enemy",
+    abilities=[Whack(), Heal()],
+)
+test_hero.current_status_effects.append(status_effects.DamageBoost())
+
+
+class TurnEngine():
+    def __init__(self, heros, enemies) -> None:
+        self.turn_order : list[BasicCharacter] = [*heros, *enemies]
+        self.position_in_turn_order : int = -1
+
+    def next_up(self):
+        self.position_in_turn_order += 1
+        if self.position_in_turn_order >= len(self.turn_order):
+            self.position_in_turn_order = 0
+        return self.turn_order[self.position_in_turn_order]
+
+    def ended(self):
+        if len(self.turn_order) <= 0: return True
+        detected = self.turn_order[0].character_type
+        for char in self.turn_order:
+            if char.character_type != detected:
+                return False
+        return True
+
+    def skip_turn(self, character):
+        pass
+
+    def remove_from_turn_order(self, character):
+        spot = self.turn_order.index(character)
+        # If character to be removed is before the current position in the turn order, the current position needs to be moved back one
+        if spot < self.position_in_turn_order:
+            self.position_in_turn_order -= 1
+        self.turn_order.remove(character)
+        # If the removed character was the last character, the current position needs to be updated to the first character
+        if self.position_in_turn_order >= len(self.turn_order):
+            self.position_in_turn_order = 0
+
+
+def printthings(heros, enemies, acting, selected = None):
+    for a in heros:
+        display = ""
+        if a == selected:
+            display += ">"
+        else:
+            display += " "
+        if a == acting:
+            display += f"[{a.name}]"
+        else:
+            display += f" {a.name}"
+        print(display)
+    for a in enemies:
+        display = ""
+        if a == selected:
+            display += ">"
+        else:
+            display += " "
+        if a == acting:
+            display += f"[{a.name}]"
+        else:
+            display += f" {a.name}"
+        print(display)
+
+
+
+
+class PsudeoLayer():
+    def __init__(self, layers : list[Layer | int] = []) -> None:
+        self.layers : list[Layer | int] = layers
+
+    def get_height(self):
+        height = 0
+        for a in self.layers:
+            if type(a) == int:
+                height += a
+            elif type(a) == PixelLayer:
+                height += len(a.pixel_array)
+            else:
+                height += 2
+        return height
+
+    def get_width(self):
+        widest = 0
+        for a in self.layers:
+            if type(a) == int:
+                continue
+            if len(a.pixel_array[0]) > widest:
+                widest = len(a.pixel_array[0])
+        return widest
+
+    def as_list(self):
+        widest = self.get_width()
+
+        offset = 0
+        for a in self.layers:
+            if type(a) == int:
+                offset += a
+                continue
+            a.update_pos(y=offset, x = int((widest - len(a.pixel_array[0]))/2))
+            if type(a) == PixelLayer:
+                offset += len(a.pixel_array)
+            else:
+                offset += 2
+
+        return [a for a in self.layers if type(a) != int]
+
+    def update_pos(self, x : int = 0, y : int = 0):
+        for a in self.layers:
+            if type(a) == int:
+                continue
+            a.update_pos(x, y)
+        return self
+
+
+def get_psudo_layer(character : BasicCharacter, selected : bool, stick_to_left_side_of_screen = False, turn = False, text : str = None):
+    if character.current_health <= 0:
+        artwork = tint_layer(character.artwork, Color.GREY)
+    elif character.skip_next_turn:
+        artwork = tint_layer(character.artwork, Color.BLUE)
+    elif status_effects.Poisoned() in character.current_status_effects:
+        artwork = tint_layer(character.artwork, Color.GREEN)
+    else:
+        artwork = character.artwork
+    output_layer = PsudeoLayer(
+        ([TextLayer(text),
+        1,] if text != None else [])
+         +
+        ([PixelLayer([
+            [Color.WHITE, None, None, None, Color.WHITE],
+            [None, Color.WHITE, None, Color.WHITE, None],
+            [None, None, Color.WHITE, None, None],
+        ]),
+        1,] if selected else [])
+         +
+        [
+        PixelLayer(artwork),
+        2,
+        TextLayer(text= f"> {character.name} <" if turn else character.name, background_color= Color.BLUE if turn else None),
+        get_health_bar(character.current_health, character.stats.max_health),
+    ])
+    output_layer.update_pos(
+        x = screen_width-output_layer.get_width() if stick_to_left_side_of_screen else 0,
+        y=screen_height-output_layer.get_height()
+    )
+    return output_layer
+
+allies = [test_hero, test_hero.deepcopy()]
+
+def get_layers(character_list : list[BasicCharacter], right : bool, selected : BasicCharacter, turn : BasicCharacter, with_text : BasicCharacter = None, text : str = None):
+    layers = []
+    for i in range(len(character_list)):
+        char = character_list[len(character_list)-1-i]
+        layer = get_psudo_layer(char, char == selected, right, char == turn, text if char == with_text else None)
+        layers.extend(
+            layer.update_pos(x = i * (layer.get_width() + 1) * (-1 if right else 1) + (-1 if right else 1)).as_list()
+        )
+    return layers
+
+
+enemies = [enemy, enemy.deepcopy()]
+
+def manufacture_layer(allies : list[BasicCharacter], enemies : list[BasicCharacter], turn : BasicCharacter, selected = None, damage_done = None, damage_target = None, show_abilities : bool = True):
+    allies = [a for a in allies.__reversed__()]
+    layers : list[PixelLayer] = get_layers(allies, True, selected, turn, damage_target, damage_done)
+    layers.extend(get_layers(enemies, False, selected, turn, damage_target, damage_done))
+
+    edge_offset = (screen_width/4-18)/2
+
+    if turn.character_type == "Ally" and show_abilities:
+        for i in range(4):
+            if i >= len(turn.abilities):
+                continue
+            layers.append(get_box(height=4, width=14).set_pos(x = int(screen_width/4 * i + edge_offset), y = screen_height+8-7))
+            layers.append(TextLayer(turn.abilities[i].name, x=int(screen_width/4 * i + edge_offset) + 3, y=screen_height+8-6))
+            if turn.abilities[i].on_cooldown:
+                layers.append(TextLayer("On Cooldown", x=int(screen_width/4 * i + edge_offset) + 5, y=screen_height+8-4))
+            else:
+                layers.append(TextLayer(str(i+1), x=int(screen_width/4 * i + edge_offset) + 15, y=screen_height+8-4))
+
+    if damage_target:
+        if damage_target in enemies:
+            index = enemies.index(damage_target)
+
+    return Screen(layers=[
+        *layers,
+        PixelLayer(tint_layer(background_layer.pixel_array, Color.BLACK))
+    ])
+
+
+
+
+
+
+
+def get_from_options(print_things_arguments, options_list, targeting_character : bool = False):
+    position = 0
+    while True:
+        if targeting_character:
+            display(manufacture_layer(*print_things_arguments, options_list[position], show_abilities=False))
+        else:
+            display(manufacture_layer(*print_things_arguments), show_abilities=False)
+        match wait_for_character_input():
+            case "LEFT":
+                if position < len(options_list)-1:
+                    position += 1
+            case "RIGHT":
+                if position > 0:
+                    position -= 1
+            case "\\n":
+                break
+    return options_list[position]
+
+def run_conflict(heros : list[BasicCharacter] = [], enemies : list[BasicCharacter] = []):
+    DEBUG = False
+
+
+    turn_engine : TurnEngine = TurnEngine(heros, enemies)
+
+    while not turn_engine.ended():
+        acting_character : BasicCharacter = turn_engine.next_up()
+
+        if acting_character.skip_next_turn:
+            acting_character.end_turn()
+            continue
+
+        display(manufacture_layer(heros, enemies, acting_character, None))
+        # printthings(heros, enemies, acting_character)
+
+        if DEBUG:
+            print("\n-----------------")
+            print(f"It is {acting_character.name}'s turn")
+
+        # Determines what to do
+        selected_action : Ability | None = None
+
+        usable_abilities = [a for a in acting_character.abilities if not a.on_cooldown]
+        if len(usable_abilities) == 0:
+            continue
+            # raise Exception(f"{acting_character.name} has no abilities")
+
+        if acting_character.character_type == "Ally":
+            if DEBUG: print("Select an action")
+            if DEBUG: print(" " + "\n ".join([ability.name + ("" if not ability.on_cooldown else f" - {ability.on_cooldown}") for ability in acting_character.abilities if not ability.on_cooldown]))
+            while selected_action == None:
+                user_input = wait_for_character_input()
+                try:
+                    selected_action = usable_abilities[int(user_input)-1]
+                except:
+                    selected_action = None
+        elif acting_character.character_type == "Enemy":
+            selected_action = usable_abilities[randint(0, len(usable_abilities)-1)]
+        if selected_action == None:
+            print(f"{acting_character.name} did nothing this round.")
+            continue
+        if DEBUG: print(f" Selected {selected_action.name} as action")
+
+        # Determines who it can be done to
+        targetable_characters : list[BasicCharacter] = []
+        my_allies = heros if acting_character.character_type == "Ally" else enemies
+        my_enemies = enemies if acting_character.character_type == "Ally" else heros
+        match selected_action.target_type:
+            case TargetType.ALLY:
+                targetable_characters = [a for a in my_allies if a.current_health > 0]
+            case TargetType.ALLIES_RANDOM:
+                temp = [a for a in my_allies if a.current_health > 0]
+                targetable_characters = [temp[randint[0, len(temp)-1]]]
+            case TargetType.ENEMY:
+                targetable_characters = [a for a in my_enemies if a.current_health > 0]
+            case TargetType.ENEMIES_RANDOM:
+                temp = [a for a in my_enemies if a.current_health > 0]
+                targetable_characters = [temp[randint[0, len(temp)-1]]]
+            case TargetType.ALL:
+                targetable_characters = [a for a in my_allies if a.current_health > 0] + [a for a in my_enemies if a.current_health > 0]
+            case TargetType.SELF:
+                targetable_characters = [acting_character]
+        if len(targetable_characters) <= 0:
+            print(f"{acting_character.name} had no targets for {selected_action}.")
+            continue
+        if DEBUG: print(f" Can target {[a.name for a in targetable_characters]}")
+
+        # Determines who to do it to (from that list)
+        if len(targetable_characters) == 1:
+            target = targetable_characters[0]
+        else:
+            target : BasicCharacter = None
+            if acting_character.character_type == "Ally":
+                # print("Select a target")
+                # print(" " + "\n ".join([c.name for c in targetable_characters]))
+                target = get_from_options([heros, enemies, acting_character], targetable_characters, True)
+            elif acting_character.character_type == "Enemy":
+                target = targetable_characters[randint(0, len(targetable_characters)-1)]
+        if DEBUG: print(f" Target is {target.name}")
+
+        # Does it
+        result = selected_action.activate(
+            using_characters_stats= acting_character.stats,
+            using_characters_effects= acting_character.current_status_effects,
+            effected_character= target,
+            DEBUG=DEBUG,
+        )
+
+        if acting_character.character_type == "Enemy":
+            sleep(1)
+
+        display(manufacture_layer(heros, enemies, acting_character, None, result, target, False))
+
+        if target.current_health <= 0:
+            turn_engine.remove_from_turn_order(target)
+
+        # Character ends their turn
+        acting_character.end_turn(DEBUG=DEBUG)
+        if acting_character.current_health <= 0:
+            turn_engine.remove_from_turn_order(acting_character)
+
+        if DEBUG:
+            print()
+            for a in heros:
+                print(a)
+                print()
+            for a in enemies:
+                print(a)
+                print()
+
+        sleep(1)
+
+    for a in heros:
+        for b in a.abilities:
+            b.on_cooldown = 0
+
+    # Returns True if the characters that are still standing (when all the not elimated characters are on one team) are on the hero's side
+    return turn_engine.next_up().character_type == "Ally"
+
+
+
+# test_hero.abilities[0].activate(test_hero.stats, test_hero.current_status_effects, enemy)
+
+# run_conflict(heros=[test_hero], enemies=[enemy, enemy.deepcopy()])
+# clear_screen()
+
+
+
+
+def get_ability_change_screen(heros):
+    x = 0
+    y = 0
+
+    while True:
+        layer = []
+        for i in range(len(heros)):
+            layer.append(PixelLayer(heros[i].artwork, x = 2, y = 22 * i))
+            for j in range(4):
+                if j < len(heros[i].abilities):
+                    text = f"> {heros[i].abilities[j].name} <" if y == i and x == j else heros[i].abilities[j].name
+                else:
+                    text = "> EMPTY <" if y == i and x == j else "EMPTY"
+                layer.append(TextLayer(
+                    text,
+                    x=(j+1) * 15 + int((15-len(text))/2),
+                    y = 16 + 22 * i,
+                    background_color=Color.BLUE if y == i and x == j else None,
+                ))
+
+            layer.extend([
+                *[PixelLayer(heros[i].abilities[j].artwork, x=(j+1) * 15, y = 22 * i) for j in range(len(heros[i].abilities))],
+                *[TextLayer(
+                        "REMOVE?" if j < len(heros[i].abilities) else "ADD?",
+                        x=(j+1) * 15 + int((15-len("REMOVE?" if j < len(heros[i].abilities) else "ADD"))/2),
+                        y = 18 + 22 * i,
+                    ) for j in range(4) if y == i and x == j
+                ],
+            ])
+
+        display(Screen([
+            *layer, 
+            get_box(height=5, width=9).set_pos(y = screen_height),
+            TextLayer("Back", x = 3, y = screen_height + 3),
+            TextLayer("1", x = 10, y = screen_height + 4),
+            background_layer,
+        ]))
+
+        user_input = wait_for_character_input()
+        if user_input == "RIGHT":
+            if x < 3:
+                x += 1
+        elif user_input == "LEFT":
+            if x > 0:
+                x -= 1
+        if user_input == "UP":
+            if y > 0:
+                y -= 1
+        elif user_input == "DOWN":
+            if y < len(heros)-1:
+                y += 1
+        elif user_input == "\\n":
+            if x < len(heros[y].abilities):
+                ability = heros[y].abilities.pop(x)
+                player_inventory.append(ability)
+            else:
+                item = get_inventory_item()
+                player_inventory.remove(item)
+                heros[y].abilities.append(item)
+        elif user_input == "1":
+            return
+
+
+# player_inventory = [Win()]
+
+
+def get_inventory_item():
+    x = 0
+    y = 0
+    selected = None
+    while not selected:
+
+        layer = []
+        for i in range(3):
+            for j in range(5):
+                spot = i * 5 + j
+                if spot < len(player_inventory):
+                    layer.append(PixelLayer(player_inventory[spot].artwork, x = j * 17, y = i * 20))
+                    text = f"> {player_inventory[spot].name} <" if i == y and j == x else player_inventory[spot].name
+                    layer.append(TextLayer(
+                        text, 
+                        x = j * 17 + int((15-len(text))/2), 
+                        y = i * 20 + 16,
+                        background_color= Color.BLUE if i == y and j == x else None
+                    ))
+
+        display(Screen([*layer, background_layer]))
+
+        user_input = wait_for_character_input()
+        if user_input == "RIGHT":
+            if x < len(player_inventory) - y * 5-1 and x < 4:
+                x += 1
+        elif user_input == "LEFT":
+            if x > 0:
+                x -= 1
+        if user_input == "UP":
+            if y > 0:
+                y -= 1
+        elif user_input == "DOWN":
+            if y < 2 and y < int(len(player_inventory)/5):
+                y += 1
+                if x >= len(player_inventory) - y * 5-1:
+                    x = len(player_inventory) - y * 5-1
+        elif user_input == "\\n":
+            return player_inventory[y * 5 + x]
+
+
+# get_ability_change_screen()
+
+update_images()
+Encounter_Map = load_art("Encounter_Map")
 
 def run_game(DEBUG = False):
     # GAME STARTs
+    clear_screen()
 
 
     party = [
         BasicCharacter(
             name= "Wizard",
-            current_health=10,
-            max_health=10,
+            stats = CharacterStats(
+                max_health=10,
+                damage=2,
+                healing=1,
+            ),
             artwork=load_art("Wizard"),
             character_type="Ally",
-            base_healing=1
+            abilities=[Whack(), Heal()],
         ),
     ]
 
@@ -1454,9 +1656,11 @@ def run_game(DEBUG = False):
     encounters : list[tuple[Area, character]] = [
         (Area(starting_x=19, starting_y=37, ending_x=32, ending_y=46), character.SCORPION, 25, 40), 
         (Area(starting_x=20, starting_y=27, ending_x=35, ending_y=34), character.DRAGON, 35, 30), 
-        (Area(starting_x=43, starting_y=3, ending_x=66, ending_y=9), character.SNAKE, 55, 2), 
+        (Area(starting_x=43, starting_y=3, ending_x=66, ending_y=9), character.SNAKE, 54, 3), 
     ]
-    map = PixelLayer(pixels=wrap_map(map=load_art("map")))
+    map = PixelLayer(pixels=wrap_map(map=load_art("map")), x=1)
+    # print(len(map.pixel_array[0]))
+    # quit()
 
 
     # Starts player at door to castle
@@ -1465,11 +1669,17 @@ def run_game(DEBUG = False):
 
     while True:
         # Displays current player position on map
-        clear_screen()
         player = PixelLayer(pixels=[[Color.PURPLE] for _ in range(3)], x = player_x + 3, y = player_y + 3,)
-        print(Screen(layers=[player, *[PixelLayer(characters._shrink_character(characters.to_subclass(a[1]).art), x=a[2], y=a[3]) for a in encounters], map]))
+        display(Screen(layers=[
+            player, 
+            *[PixelLayer(characters._shrink_character(characters.to_subclass(a[1]).art), x=a[2], y=a[3]) for a in encounters], 
+            *boxify("Change Abilties", 1),
+            *boxify("Quit", 2, 30),
+            map, 
+            background_layer
+        ]))
         if DEBUG: print(player_x, player_y)
-
+        
         # Gets how the player moves
         user_input = wait_for_character_input()
         if user_input == "UP" and player_y > 0:
@@ -1480,19 +1690,28 @@ def run_game(DEBUG = False):
             player_x -= 1
         elif user_input == "RIGHT" and player_x < 75:
             player_x += 1
+        elif user_input == "1":
+            get_ability_change_screen(party)
+            continue
+        elif user_input == "2":
+            clear_screen()
+            quit()
+        else:
+            continue
 
         # Checks if player's  new position matters
         if len(encounters) == 0:
             # Check to see if in castle
             if castle.in_area(player_x, player_y):
                 # Win game
-                run_outro_dialogue()
+                run_outro_dialogue(party[0])
                 quit()
-        # Checks if player is on encounter location
-        encounter_triggered : bool = False
+
+        # Checks if player is on boss encounter location
+        boss_encounter_triggered : bool = False
         for encounter in encounters:
             if encounter[0].in_area(player_x, player_y):
-                encounter_triggered = True
+                boss_encounter_triggered = True
                 # print(f"in encounter {encounter[1]}")
                 enemy = encounter[1]
                 if enemy == character.SNAKE:
@@ -1502,80 +1721,85 @@ def run_game(DEBUG = False):
                 elif enemy == character.SCORPION:
                     enemy = get_scorpion_enemy(scale=3)
                 # Start fight
-                victory : bool = run_battle_engine(enemies=[enemy], heros=party)
+                victory : bool = run_conflict(heros=party, enemies=[enemy])
                 if victory:
-                    clear_screen()
-                    print(get_victory_screen())
+                    sleep(0.5)
+                    display(get_victory_screen())
                     wait_for_character_input()
                     for member in party:
-                        member.current_health = member.max_health
+                        member.full_heal()
                     # If won, remove encounter from list of encounters
                     encounters.remove(encounter)
                     # If scorpion, recruit new party member
                     if enemy.name == "Scorpion":
                         # Recruit new party member
+                        recruited : bool = run_recruiting_druid_dialogue(party[0])
+                        if recruited:
+                            party.insert(
+                                0,
+                                BasicCharacter(
+                                    name= "Druid",
+                                    stats= CharacterStats(damage=1, healing=5),
+                                    artwork=load_art("Druid"),
+                                    character_type="Ally",
+                                )
+                            )
                         pass
                 else:
-                    clear_screen()
-                    print(get_defeat_screen())
+                    display(get_defeat_screen())
                     wait_for_character_input()
                     for member in party:
-                        member.current_health = member.max_health
+                        member.full_heal()
                     player_x = castle_door[0]
                     player_y = castle_door[1]
                 break # breaks the loop that checks for encounters
 
         # Checks if random encounter has triggered
-        if not encounter_triggered:
+        if not boss_encounter_triggered:
             # print("not in encounter")
             if randint(0, 25) == 0:
                 # Start random fight
-                distance_to_diagonal = (50 * player_x - 75 * player_y) / 90.138781
-                if distance_to_diagonal < 0 and player_x > 25:
+                if Encounter_Map[player_y][player_x] == (255, 0, 0):
                     enemy_type = "Snake"
                     enemies = [get_snake_enemy(scale=1), get_snake_enemy(scale=1)]
-                elif distance_to_diagonal > 12:
+                elif Encounter_Map[player_y][player_x] == (63, 72, 204):
                     enemy_type = "Dragon"
                     enemies=[get_dragon_enemy(scale=1), get_dragon_enemy(scale=1)]
-                else:
+                elif Encounter_Map[player_y][player_x] == (95, 62, 29):
                     enemy_type = "Scorpion"
                     enemies=[get_scorpion_enemy(scale=1), get_scorpion_enemy(scale=1)]
+                else:
+                    continue
 
-                victory : bool = run_battle_engine(enemies=enemies, heros=party)
+                victory : bool = run_conflict(heros=party, enemies=enemies)
                 if victory:
                     # Indicate victory
-                    clear_screen()
-                    print(get_victory_screen())
+                    display(get_victory_screen())
                     wait_for_character_input()
                     for member in party:
-                        member.current_health = member.max_health
+                        member.full_heal()
 
                     # DROPS
-                    random_drop = randint(0, 1)
+                    random_drop = randint(0, 0)
                     if random_drop == 0:
-                        charm = Charms.POWERSPELL if enemy_type == "Scorpion" else Charms.DIRT if enemy_type == "Dragon" else Charms.DIRT
-                        clear_screen()
-                        print(get_drops_screen(charm))
+                        charm = DamageBoost() if enemy_type == "Scorpion" else Freeze() if enemy_type == "Dragon" else Poison()
+                        display(get_drops_screen(charm))
                         wait_for_character_input()
-                        for a in party:
-                            a.base_damage *= 2
+                        player_inventory.append(charm)
+                        # for a in party:
+                        #     a.base_damage *= 2
                     elif random_drop == 1:
                         charm = Charms.DIRT if enemy_type == "Scorpion" else Charms.WATER if enemy_type == "Dragon" else Charms.LAVA
-                        clear_screen()
-                        print(get_drops_screen(charm))
+                        display(get_drops_screen(charm))
                         wait_for_character_input()
                     # else: player gets nothing
                 else:
-                    clear_screen()
-                    print(get_defeat_screen())
+                    display(get_defeat_screen())
                     wait_for_character_input()
                     for member in party:
-                        member.current_health = member.max_health
+                        member.full_heal()
                     player_x = castle_door[0]
                     player_y = castle_door[1]
 
 run_game()
-
-
-
 
