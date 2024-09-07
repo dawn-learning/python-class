@@ -1,21 +1,20 @@
-# Python Programming Parts 1-3 at the Athens Library
-This GitHub repository contains thorough notes, code snippets to copy and paste, and the completed project as a preview.
-
-## The class
+![Title Bar](https://github.com/user-attachments/assets/f8d6e47b-dd6c-4339-a150-19eb535aceb4)
 Learn the basics of Python through Game Design! Over the course of the three classes, you will be given the tools needed to build a simple visual novel detective game and the fundamentals needed to make more complex games.
 
-### Part 1:
-We plan to cover variables, Boolean Logic, if else, and loops.
+This GitHub repository contains thorough notes, code snippets to copy and paste, and the completed project as a preview.
 
-### Part 2:
-We plan to cover importing, classes, functions, and OOP.
+Class 1:
+  1. [Printing](https://github.com/JarodSGilliam/LibraryLearning/blob/main/Part%201/1.%20Printing.md)
+  2. [User Input](https://github.com/JarodSGilliam/LibraryLearning/blob/main/Part%201/2.%20User%20Input.md)
 
-### Part 3:
-We plan to cover how to add visuals using Tkinter.
+Class 2:
 
-## Setup steps for the class
-How to setup for the Python programming class on a computer that has never run Python before.
 
+
+![Download Bar 1](https://github.com/user-attachments/assets/87442f7b-da6f-4f41-9c98-f58ca256f123)
+
+
+## Python and VS Code at home
 1. Download and install Visual Studio Code from https://code.visualstudio.com/Download.
 2. Open Visual Studio Code.
 3. Select the "dark high contrast" setting if it appears.
@@ -34,3 +33,7 @@ How to setup for the Python programming class on a computer that has never run P
 16. Type "print("hi")" into the file.
 17. Click the play button in the upper right corner.
 18. In the new bar at the bottom that appears there should be three lines. The middle one should say "hi".
+
+## Other resources
+https://www.w3schools.com/python/
+https://www.codecademy.com/learn/learn-python-3
