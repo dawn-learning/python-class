@@ -1,3 +1,4 @@
+from __future__ import annotations
 from enum import Enum
 
 class Color(Enum):
@@ -19,6 +20,19 @@ class Color(Enum):
 
     def __rmul__(self, other):
         return [self for _ in range(other)]
+
+    def __iter__(self):
+        return self.value.__iter__()
+
+    def combine(color1 : tuple | Color, color2 : tuple | Color):
+        r1, g1, b1 = color1
+        r2, g2, b2 = color2
+        return (int((r1+r2)/2), int((g1+g2)/2), int((b1+b2)/2))
+
+    def brightness_value(color) -> float:
+        '''Returns brightness value across range from 0 (black) to 1 (white)'''
+        r, g, b = color
+        return (r+g+b)/765
 
 def update_image(image_name : str, DEBUG : bool = False):
     from PIL import Image

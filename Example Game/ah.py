@@ -32,7 +32,7 @@ class Screen:
         self.size_x = size_x
         self.size_y = size_y
 
-    def __str__(self):
+    def flatten(self):
         # Squashes layers into one Pixel Layer
         output_pixels = []
 
@@ -104,8 +104,11 @@ class Screen:
                 row.append(pixel)
             output_pixels.append(row)
 
+        return output_pixels
+
+    def __str__(self):
         # Prints the pixel layer
-        return str(PixelLayer(pixels=output_pixels))
+        return str(PixelLayer(pixels=self.flatten()))
 
 
 class Layer:
@@ -142,7 +145,97 @@ class PixelLayer(Layer):
     def __init__(self, pixels = [], x = 0, y = 0) -> None:
         super().__init__(x, y)
         self.pixel_array = pixels
-    
+
+    def get_pixel_pair(pixel_array, first_line, second_line, element_index):
+        if second_line == None:
+            top = pixel_array[first_line][element_index]
+
+            top_character = None
+            if type(top) == TextPixel:
+                top_character = top.character
+                top = top.top_pixel_color
+
+            if not top:
+                top = Color.BLACK
+            if type(top) == Color:
+                top = top.value
+
+            if top_character:
+                # Text color is black on light colors and white on dark colors
+                r, g, b, = top
+                if r + g + b > (255 + 255 + 255)/2:
+                    text_color = (0, 0, 0)
+                else:
+                    text_color = (255, 255, 255)
+
+                return character_and_pixel.format(*text_color, *top, top_character)
+                # previous_top = None
+                # previous_bottom = None
+            else:
+                # if previous_top == top:
+                #     line += pixel_only
+                # else:
+                return top_pixel_only.format(*top)
+                    # previous_top = top
+        else:
+            top = pixel_array[first_line][element_index]
+            top_character = None
+
+            try:
+                bottom = pixel_array[second_line][element_index]
+            except:
+                bottom = None
+
+            if type(top) == TextPixel and type(bottom) == TextPixel:
+                raise Exception("OVERLAPPING TEXT")
+
+            if type(top) == TextPixel:
+                top_character = top.character
+                top = top.top_pixel_color
+
+            if type(bottom) == TextPixel:
+                top_character = bottom.character
+                bottom = bottom.top_pixel_color
+
+            if not top:
+                top = Color.BLACK
+            if type(top) == Color:
+                top = top.value
+            
+            if not bottom:
+                bottom = Color.BLACK
+            if type(bottom) == Color:
+                bottom = bottom.value
+
+            if top_character:
+                r = int((top[0] + bottom[0])/2)
+                g = int((top[1] + bottom[1])/2)
+                b = int((top[2] + bottom[2])/2)
+
+                # Text color is black on light colors and white on dark colors
+                if r + g + b > (255 + 255 + 255)/2:
+                    text_color = (0, 0, 0)
+                else:
+                    text_color = (255, 255, 255)
+
+                return character_and_pixel.format(*text_color, r, g, b, top_character)
+                # previous_top = None
+                # previous_bottom = None
+            else:
+                # if previous_top == top and previous_bottom == bottom:
+                #     line += pixel_only
+                # elif previous_top == top:
+                #     line += bottom_pixel_only.format(*bottom)
+                #     previous_bottom = bottom
+                # elif previous_bottom == bottom:
+                #     line += top_pixel_only.format(*top)
+                #     previous_top = top
+                # else:
+                return top_and_bottom_pixels.format(*top, *bottom)
+                    # previous_top = top
+                    # previous_bottom = bottom
+
+
     def __str__(self):
         pixels = self.pixel_array
         output = ""
@@ -151,97 +244,12 @@ class PixelLayer(Layer):
             first = line_pair*2
             second = line_pair*2+1
 
-            previous_top = None
-            previous_bottom = None
+            # previous_top = None
+            # previous_bottom = None
 
-            if second >= len(pixels):
-                for column in range(len(pixels[first])):
-                    top = pixels[first][column]
-                    top_character = None
-                    if type(top) == TextPixel:
-                        top_character = top.character
-                        top = top.top_pixel_color
+            for column in range(len(pixels[first])):
+                line += PixelLayer.get_pixel_pair(self.pixel_array, first, None if second >= len(pixels) else second, column)
 
-                    if not top:
-                        top = Color.BLACK
-                    if type(top) == Color:
-                        top = top.value
-
-                    if top_character:
-                        # Text color is black on light colors and white on dark colors
-                        r, g, b, = top
-                        if r + g + b > (255 + 255 + 255)/2:
-                            text_color = (0, 0, 0)
-                        else:
-                            text_color = (255, 255, 255)
-
-                        line += character_and_pixel.format(*top, top_character)
-                        previous_top = None
-                        previous_bottom = None
-                    else:
-                        if previous_top == top:
-                            line += pixel_only
-                        else:
-                            line += top_pixel_only.format(*top)
-                            previous_top = top
-            else:
-                for column in range(len(pixels[first])):
-                    top = pixels[first][column]
-                    top_character = None
-
-                    try:
-                        bottom = pixels[second][column]
-                    except:
-                        bottom = None
-                    
-                    if type(top) == TextPixel and type(bottom) == TextPixel:
-                        raise Exception("OVERLAPPING TEXT")
-
-                    if type(top) == TextPixel:
-                       top_character = top.character
-                       top = top.top_pixel_color
-
-                    if type(bottom) == TextPixel:
-                       top_character = bottom.character
-                       bottom = bottom.top_pixel_color
-
-                    if not top:
-                        top = Color.BLACK
-                    if type(top) == Color:
-                        top = top.value
-                    
-                    if not bottom:
-                        bottom = Color.BLACK
-                    if type(bottom) == Color:
-                        bottom = bottom.value
-
-                    if top_character:
-                        r = int((top[0] + bottom[0])/2)
-                        g = int((top[1] + bottom[1])/2)
-                        b = int((top[2] + bottom[2])/2)
-
-                        # Text color is black on light colors and white on dark colors
-                        if r + g + b > (255 + 255 + 255)/2:
-                            text_color = (0, 0, 0)
-                        else:
-                            text_color = (255, 255, 255)
-
-                        line += character_and_pixel.format(*text_color, r, g, b, top_character)
-                        previous_top = None
-                        previous_bottom = None
-                    else:
-                        if previous_top == top and previous_bottom == bottom:
-                            line += pixel_only
-                        elif previous_top == top:
-                            line += bottom_pixel_only.format(*bottom)
-                            previous_bottom = bottom
-                        elif previous_bottom == bottom:
-                            line += top_pixel_only.format(*top)
-                            previous_top = top
-                        else:
-                            line += top_and_bottom_pixels.format(*top, *bottom)
-                            previous_top = top
-                            previous_bottom = bottom
             output += line + line_end + "\n"
         return output[:len(output)-1]
 
@@ -1118,10 +1126,90 @@ def run_recruiting_druid_dialogue(main_character):
 
 
 
-def display(screen : Screen, width_override : int = None, height_override : int = None):
+# def display(screen : Screen, width_override : int = None, height_override : int = None) -> None:
+#     width = screen_width if width_override == None else width_override
+#     height = screen_height if height_override == None else height_override
+#     print(f"\u001b[{width}D" + f"\u001b[{height}A" + str(screen))
+
+
+global previous
+previous = None
+
+def display(screen : Screen, width_override : int = None, height_override : int = None, DEBUG = False) -> None:
+    def get_text_color(background_color):
+        if Color.brightness_value(background_color) > 0.5:
+            text_color = (0, 0, 0)
+        else:
+            text_color = (255, 255, 255)
+        return text_color
+
+    # Move back to start
     width = screen_width if width_override == None else width_override
     height = screen_height if height_override == None else height_override
-    print(f"\u001b[{width}D" + f"\u001b[{height}A" + str(screen))
+    output : str = f"\u001b[{100}D" + f"\u001b[{100+8}A"
+    # Find and replace differences
+    global previous
+    pixels : list[list[tuple]] = screen.flatten()
+    if previous == None:
+        output += str(PixelLayer(pixels))
+    else:
+        last_change = (0, 0)
+        count_y = 0
+        for row_pair_index in range(ceil(len(pixels)/2)):
+            row_pair_index *= 2
+            top_row = pixels[row_pair_index]
+            bottom_row = pixels[row_pair_index+1] if row_pair_index +1 < len(pixels) else None
+            count_x = 0
+            for element_index in range(len(top_row)):
+                if top_row[element_index] != previous[row_pair_index][element_index] or (False if not bottom_row else (bottom_row[element_index] != previous[row_pair_index+1][element_index])):
+                    if count_y > 0:
+                        output += f"\u001b[{count_y}B" + f"\u001b[{100}D"
+                        count_y = 0
+                    if count_x > 0:
+                        output += f"\u001b[{count_x}C"
+                        count_x = 0
+                    # output += "1"
+                    output += PixelLayer.get_pixel_pair(pixels, row_pair_index, row_pair_index+1, element_index)
+                #     # A difference was found
+                #     if DEBUG: print(f"difference detected was {previous[row_pair_index][element_index]} and {previous[row_pair_index+1][element_index]} is {top_row[element_index]} and {bottom_row[element_index]} at {element_index-last_change[0]} and {row_pair_index-last_change[1]}")
+                #     move_y = row_pair_index-last_change[1]
+                #     if move_y > 0:
+                #         output += f"\u001b[{move_y-1}B\u001b[{width}D"
+                #     move_x = element_index-last_change[0]-1
+                #     if move_x > 0:
+                #         output += f"\u001b[{move_x}C"
+                else:
+                    count_x += 1
+                    # output += f"\u001b[{0}C"
+                    # output += "0"
+                    # if bottom_row:
+                    #     if type(top_row[element_index]) == TextPixel:
+                    #         pixel = top_row[element_index]
+                    #         output += character_and_pixel.format(
+                    #             *get_text_color(pixel.top_pixel_color), 
+                    #             *Color.combine(pixel.top_pixel_color, bottom_row[element_index]), 
+                    #             "H"
+                    #         )
+                    #     elif type(bottom_row[element_index]) == TextPixel:
+                    #         pixel = bottom_row[element_index]
+                    #         output += character_and_pixel.format(
+                    #             *get_text_color(pixel.top_pixel_color), 
+                    #             *Color.combine(pixel.top_pixel_color, top_row[element_index]), 
+                    #             "H"
+                    #         )
+                    #     else:
+                    #         output += top_and_bottom_pixels.format(*top_row[element_index], *bottom_row[element_index])
+                    # else:
+                    #     if type(top_row[element_index]) == TextPixel:
+                    #         pixel = top_row[element_index]
+                    #         output += character_and_pixel.format(*get_text_color(pixel.top_pixel_color), *pixel.top_pixel_color, "H")
+                    #     else:
+                    #         output += top_pixel_only.format(*top_row[element_index])
+                    # last_change = (element_index, row_pair_index)
+            count_y += 1
+    print(output + line_end)
+    previous = pixels
+
 
 def boxify(text : str, number : int, x_offest : int = 3):
     return [
@@ -1624,7 +1712,6 @@ def get_inventory_item():
 
 # get_ability_change_screen()
 
-update_images()
 Encounter_Map = load_art("Encounter_Map")
 
 def run_game(DEBUG = False):
@@ -1800,5 +1887,6 @@ def run_game(DEBUG = False):
                     player_x = castle_door[0]
                     player_y = castle_door[1]
 
-run_game()
+if __name__ == "__main__":
+    run_game()
 
