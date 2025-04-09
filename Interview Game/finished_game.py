@@ -1,6 +1,6 @@
-from interviewprint import print_character_dialogue, print_player_options
+from interviewprint import print_character_dialogue, print_player_options, character_name
 
-print_character_dialogue("what.", character_name="Amy")
+print_character_dialogue("what.", None, name="Amy")
 print_player_options("HI how are you?")
 print_player_options("WHAT!")
 print_player_options("Go away.")
